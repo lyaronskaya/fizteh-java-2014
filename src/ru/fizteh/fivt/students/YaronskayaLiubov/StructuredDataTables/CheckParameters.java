@@ -43,7 +43,10 @@ public class CheckParameters {
             throw new IllegalArgumentException("table name is empty");
         }
         if (name.contains(File.separator)) {
-            throw new IllegalStateException("table name contains separator");
+            throw new IllegalArgumentException("table name contains separator");
+        }
+        if (name.contains(".") || name.contains(";") || name.contains("/") || name.contains("\\")) {
+            throw new IllegalArgumentException("illegal table name");
         }
     }
 

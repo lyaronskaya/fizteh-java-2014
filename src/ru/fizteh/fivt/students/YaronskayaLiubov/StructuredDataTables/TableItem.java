@@ -39,7 +39,7 @@ public class TableItem implements Storeable {
         if (columnIndex < 0 || columnIndex >= itemsCount) {
             throw new IndexOutOfBoundsException("illegal column index");
         }
-        if (items[columnIndex].getClass() != value.getClass()) {
+        if (table.getColumnType(columnIndex) != value.getClass()) {
             throw new ColumnFormatException("illegal column format: Expected: "
                     + items[columnIndex].getClass().toString() + " Actual: "
                     + value.getClass().toString());
@@ -127,7 +127,7 @@ public class TableItem implements Storeable {
             throw new IndexOutOfBoundsException("illegal column index");
         }
         if (!(items[columnIndex] instanceof String)) {
-            throw new ColumnFormatException("Column format is not Long");
+            throw new ColumnFormatException("Column format is not String");
         }
         return (String) items[columnIndex];
     }
