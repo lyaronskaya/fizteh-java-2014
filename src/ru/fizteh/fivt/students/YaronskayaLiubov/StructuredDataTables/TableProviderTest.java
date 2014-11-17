@@ -180,7 +180,7 @@ public class TableProviderTest {
 
     @Test()
     public void testDeserialize() throws Exception {
-        Table table = provider.createTable("table", columnTypes2);
+        Table table = provider.createTable("table2", columnTypes2);
         Storeable actualRow = provider.deserialize(table, serializedRow);
         for (int i = 0; i < columnTypes2.size(); ++i) {
             assertEquals(row.getColumnAt(i), actualRow.getColumnAt(i));

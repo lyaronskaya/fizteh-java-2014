@@ -95,15 +95,22 @@ public class StoreableDataTableProvider implements TableProvider {
                     if (xmlReader.getLocalName().equals("row")) {
                         break;
                     }
-                    if (xmlReader.getName().equals("null")) {
+                    try {
+                    if (xmlReader.getLocalName().equals("null")) {
                         row.setColumnAt(columnIndex, null);
                     } else {
-                        if (!xmlReader.getName().equals("col")) {
+                        if (!xmlReader.getLocalName().equals("col")) {
                             throw new ParseException("Incorrect tag name", xmlReader.getLocation().getCharacterOffset());
                         }
                         row.setColumnAt(columnIndex, parseXxx(xmlReader.getElementText(), table.getColumnType(columnIndex)));
                     }
+                    } catch (NumberFormatException e) {
+                        throw new ParseException("Incorrect xml format", xmlReader.getLocation().getCharacterOffset());
+                    }
                     ++columnIndex;
+                }
+                if (columnIndex != table.getColumnsCount()) {
+                    throw new ParseException("Incorrect xml format", 0);
                 }
 
             } else {

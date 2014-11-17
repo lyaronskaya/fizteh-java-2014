@@ -31,9 +31,9 @@ public class TableTest {
     static Class<?>[] availableTypes = {Integer.class, Long.class,
             Byte.class, Float.class, Double.class, Boolean.class, String.class};
     static int dataSize = 1000;
-    static String[] keys;
+    static String[] keys = new String[dataSize];
     static Storeable row;
-    static Storeable[] rows;
+    static Storeable[] rows = new Storeable[dataSize];
     static String[][] specialData = new String[][]{
             {"russian", "буковки"},
             {"русские", "буковки"},
@@ -41,7 +41,7 @@ public class TableTest {
             {"null", "null"},
             {"\\", "/"}
     };
-    static Storeable[] specialRows;
+    static Storeable[] specialRows = new Storeable[specialData.length];
     @Rule
     public TemporaryFolder testFolder = new TemporaryFolder();
 
@@ -101,7 +101,7 @@ public class TableTest {
             }
         }
         for (int i = 0; i < dataSize; ++i) {
-            assertNull(table.put(keys[i], rows[i]));
+            assertNotNull(table.put(keys[i], rows[i]));
         }
         for (int i = 0; i < dataSize; ++i) {
             assertNotNull(table.get(keys[i]));
@@ -161,8 +161,8 @@ public class TableTest {
     public void testRemoveExistentKey() throws Exception {
         for (int i = 0; i < dataSize; ++i) {
             table.put(keys[i], rows[i]);
-            Storeable oldRow = table.remove("key");
-            for (int i1 = 0; i1 < table.getColumnsCount(); ++i) {
+            Storeable oldRow = table.remove(keys[i]);
+            for (int i1 = 0; i1 < table.getColumnsCount(); ++i1) {
                 assertEquals(rows[i].getColumnAt(i1), oldRow.getColumnAt(i1));
             }
             assertNull(table.get(keys[i]));
@@ -196,16 +196,16 @@ public class TableTest {
         for (int i = 0; i < dataSize; ++i) {
             Storeable oldRow = table.get(keys[i]);
             for (int i1 = 0; i1 < table.getColumnsCount(); ++i1) {
-                assertEquals(rows[i].getColumnAt(i1), oldRow.getColumnAt(i));
+                assertEquals(rows[i].getColumnAt(i1), oldRow.getColumnAt(i1));
             }
         }
         for (int i = 0; i < dataSize - 1; ++i) {
             table.put(keys[i], rows[i + 1]);
         }
-        for (int i = 0; i < dataSize; ++i) {
+        for (int i = 0; i < dataSize - 1; ++i) {
             Storeable oldRow = table.get(keys[i]);
             for (int i1 = 0; i1 < table.getColumnsCount(); ++i1) {
-                assertEquals(rows[i].getColumnAt(i1), oldRow.getColumnAt(i));
+                assertEquals(rows[i + 1].getColumnAt(i1), oldRow.getColumnAt(i1));
             }
         }
         assertEquals(dataSize - 1, table.commit());
