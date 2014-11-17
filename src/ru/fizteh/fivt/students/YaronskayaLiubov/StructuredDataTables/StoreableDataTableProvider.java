@@ -92,6 +92,9 @@ public class StoreableDataTableProvider implements TableProvider {
                 int columnIndex = 0;
                 while (xmlReader.hasNext()) {
                     int subElementNodeType = xmlReader.nextTag();
+                    if (xmlReader.getLocalName().equals("row")) {
+                        break;
+                    }
                     if (xmlReader.getName().equals("null")) {
                         row.setColumnAt(columnIndex, null);
                     } else {

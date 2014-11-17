@@ -196,14 +196,17 @@ public class TableTest {
         for (int i = 0; i < dataSize; ++i) {
             Storeable oldRow = table.get(keys[i]);
             for (int i1 = 0; i1 < table.getColumnsCount(); ++i1) {
-                assertNotNull(rows[i].getColumnAt(i1), oldRow.getColumnAt(i));
+                assertEquals(rows[i].getColumnAt(i1), oldRow.getColumnAt(i));
             }
         }
         for (int i = 0; i < dataSize - 1; ++i) {
-            table.put(keys[i], values[i + 1]);
+            table.put(keys[i], rows[i + 1]);
         }
         for (int i = 0; i < dataSize; ++i) {
-            assertNotNull(values[i], table.get(keys[i]));
+            Storeable oldRow = table.get(keys[i]);
+            for (int i1 = 0; i1 < table.getColumnsCount(); ++i1) {
+                assertEquals(rows[i].getColumnAt(i1), oldRow.getColumnAt(i));
+            }
         }
         assertEquals(dataSize - 1, table.commit());
     }
@@ -211,16 +214,16 @@ public class TableTest {
     @Test
     public void testRollback() throws Exception {
         for (int i = 0; i < dataSize; ++i) {
-            table.put(keys[i], values[i]);
+            table.put(keys[i], rows[i]);
         }
         assertEquals(dataSize, table.rollback());
         assertEquals(0, table.rollback());
         for (int i = 0; i < dataSize; ++i) {
-            table.put(keys[i], values[i]);
+            table.put(keys[i], rows[i]);
         }
         assertEquals(dataSize, table.commit());
         for (int i = 0; i < dataSize / 2; ++i) {
-            table.put(keys[i], values[dataSize / 2 + i]);
+            table.put(keys[i], rows[dataSize / 2 + i]);
         }
         assertEquals(dataSize / 2, table.rollback());
         assertEquals(0, table.rollback());
