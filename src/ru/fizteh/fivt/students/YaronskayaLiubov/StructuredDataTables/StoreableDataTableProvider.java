@@ -108,6 +108,8 @@ public class StoreableDataTableProvider implements TableProvider {
             }
         } catch (XMLStreamException e) {
             throw new RuntimeException("error reading " + value);
+        } catch (IOException e) {
+            throw new RuntimeException("error parsing " + value);
         }
         return row;
     }
@@ -157,7 +159,7 @@ public class StoreableDataTableProvider implements TableProvider {
         return row;
     }
 
-    public static Object parseXxx(String value, Class<?> type) {
+    public static Object parseXxx(String value, Class<?> type) throws IOException {
         switch (type.getSimpleName()) {
             case "Integer":
                 return Integer.parseInt(value);
