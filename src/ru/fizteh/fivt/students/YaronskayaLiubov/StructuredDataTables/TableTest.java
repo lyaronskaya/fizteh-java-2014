@@ -1,6 +1,7 @@
 package ru.fizteh.fivt.students.YaronskayaLiubov.StructuredDataTables;
 
 import static junit.framework.Assert.*;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;

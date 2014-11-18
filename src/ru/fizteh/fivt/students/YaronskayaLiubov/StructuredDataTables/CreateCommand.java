@@ -63,7 +63,7 @@ public class CreateCommand extends Command {
             columnTypes.add(columnClass);
         }
 
-            MultiFileHashMap.provider.createTable(args[1], columnTypes);
+        MultiFileHashMap.provider.createTable(args[1], columnTypes);
         return true;
     }
 }

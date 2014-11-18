@@ -22,7 +22,7 @@ public class PutCommand extends Command {
             System.err.println("no table");
             return false;
         }
-            Storeable row = MultiFileHashMap.provider.deserialize(MultiFileHashMap.currTable, args[2]);
+        Storeable row = MultiFileHashMap.provider.deserialize(MultiFileHashMap.currTable, args[2]);
         Storeable old = MultiFileHashMap.currTable.put(args[1], row);
         if (old != null) {
             System.out.println("overwrite");

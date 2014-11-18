@@ -159,6 +159,7 @@ public class StoreableDataTable implements Table {
         save();
         super.finalize();
     }
+
     public List<String> list() {
         List<String> keys = new ArrayList<String>(committedData.keySet());
         keys.removeAll(deltaRemoved);
@@ -206,8 +207,7 @@ public class StoreableDataTable implements Table {
                         try {
                             Storeable row = new StoreableDataTableProviderFactory().create(curDB.getParent()).deserialize(this, new String(value, "UTF-8"));
                             committedData.put(new String(key, "UTF-8"), row);
-                        }
-                        catch (ParseException e) {
+                        } catch (ParseException e) {
                             throw new RuntimeException(e.getMessage());
                         }
                     }
@@ -364,6 +364,7 @@ public class StoreableDataTable implements Table {
             throw new RuntimeException("error writing signature");
         }
     }
+
     public static void fileDelete(File myDir) {
         if (myDir.isDirectory()) {
             File[] content = myDir.listFiles();
