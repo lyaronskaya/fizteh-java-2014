@@ -70,6 +70,6 @@ public class XMLCreate {
     }
 
     public static void main(String[] args) {
-        System.out.println(Integer.class.getSimpleName());
+
     }
 }

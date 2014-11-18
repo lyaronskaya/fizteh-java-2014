@@ -10,16 +10,6 @@ import java.util.ArrayList;
  * Created by luba_yaronskaya on 16.11.14.
  */
 
-/**
- * Список фиксированной структуры, строка таблицы {@link ru.fizteh.fivt.storage.structured.Table}.
- * <p/>
- * Нумерация колонок с нуля. Позиция в списке соответствует колонке таблицы под тем же номером.
- * <p/>
- * С помощью {@link ru.fizteh.fivt.storage.structured.TableProvider} может быть сериализован или десериализован.
- * <p/>
- * Для получения объекта из нужной колонки воспользуйтесь соответствующим геттером.
- * Для установки объекта а колонку воспользуйтесь {@link #setColumnAt(int, Object)} .
- */
 public class TableItem implements Storeable {
     private Object[] items;
     private int itemsCount;

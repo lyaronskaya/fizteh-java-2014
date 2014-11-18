@@ -189,4 +189,7 @@ public class StoreableDataTableProvider implements TableProvider {
                 throw new IOException("Undefined type of value");
         }
     }
+    public HashMap<String, StoreableDataTable> getTables() {
+        return tables;
+    }
 }

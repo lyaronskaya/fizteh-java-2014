@@ -1,16 +1,22 @@
 package ru.fizteh.fivt.students.YaronskayaLiubov.StructuredDataTables;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Scanner;
+
 /**
  * Created by luba_yaronskaya on 15.11.14.
  */
 public class MultiFileHashMap {
-   /* public static String dbDir;
+    public static String dbDir;
     protected static StoreableDataTableProvider provider;
     protected static StoreableDataTable currTable;
     private static HashMap<String, Command> multiFileHashMapCommands;
     public static boolean errorOccurred;
 
-    public boolean exec(String[] args) {
+    public boolean exec(String[] args) throws IOException {
         dbDir = System.getProperty("fizteh.db.dir");
         if (dbDir == null) {
             System.err.println("database unspecified in properties");
@@ -23,7 +29,7 @@ public class MultiFileHashMap {
                 System.err.println("error creating database " + dbDir);
             }
         }
-        provider = (JUnitTableProvider) new JUnitTableProviderFactory().create(dbDir);
+        provider = (StoreableDataTableProvider) new StoreableDataTableProviderFactory().create(dbDir);
         multiFileHashMapCommands = new HashMap<String, Command>();
         multiFileHashMapCommands.put("commit", new CommitCommand());
         multiFileHashMapCommands.put("create", new CreateCommand());
@@ -102,14 +108,8 @@ public class MultiFileHashMap {
 
     public static void save() {
         for (String tableName : provider.getTables().keySet()) {
-            JUnitTable table = provider.tables.get(tableName);
+            StoreableDataTable table = provider.tables.get(tableName);
             table.save();
         }
     }
-
-    public static void main(String[] args) {
-        StringWriter stringWriter = new StringWriter(); XMLOutputFactory factory = XMLOutputFactory.newInstance(); XMLStreamWriter writer = factory
-                .createXMLStreamWriter(stringWriter); writer.writeStartElement("root"); writer.writeAttribute("attr", "value"); writer.writeStartElement("element"); writer.writeCharacters("content"); writer.writeEndElement(); writer.writeEndElement();
-        writer.flush(); System.out.println(stringWriter.getBuffer());
-    }*/
 }

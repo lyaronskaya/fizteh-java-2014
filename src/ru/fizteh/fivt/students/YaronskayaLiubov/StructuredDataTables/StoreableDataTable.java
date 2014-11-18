@@ -3,7 +3,6 @@ package ru.fizteh.fivt.students.YaronskayaLiubov.StructuredDataTables;
 import ru.fizteh.fivt.storage.structured.ColumnFormatException;
 import ru.fizteh.fivt.storage.structured.Storeable;
 import ru.fizteh.fivt.storage.structured.Table;
-import ru.fizteh.fivt.students.YaronskayaLiubov.JUnit.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,23 +13,13 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.text.ParseException;
+import java.util.*;
 
 /**
  * Created by luba_yaronskaya on 16.11.14.
  */
 
-/**
- * Представляет интерфейс для работы с таблицей, содержащей ключи-значения. Ключи должны быть уникальными.
- * <p/>
- * Транзакционность: изменения фиксируются или откатываются с помощью методов {@link #commit()} или {@link #rollback()},
- * соответственно. Предполагается, что между вызовами этих методов никаких операций ввода-вывода не происходит.
- * <p/>
- * Данный интерфейс не является потокобезопасным.
- */
 public class StoreableDataTable implements Table {
     protected File curDB;
     public String dbPath;
@@ -53,16 +42,11 @@ public class StoreableDataTable implements Table {
         }
         this.dbPath = dbPath;
         curDB = new File(dbPath);
-        //delta = new HashSet<String>();
         committedData = new HashMap<String, Storeable>();
         deltaAdded = new HashMap<String, Storeable>();
         deltaChanged = new HashMap<String, Storeable>();
         deltaRemoved = new HashSet<String>();
         loadDBData();
-    }
-
-    public void setColumnTypes(List<Class<?>> columnTypes) {
-        this.columnTypes = columnTypes;
     }
 
     @Override
@@ -175,15 +159,26 @@ public class StoreableDataTable implements Table {
         save();
         super.finalize();
     }
+    public List<String> list() {
+        List<String> keys = new ArrayList<String>(committedData.keySet());
+        keys.removeAll(deltaRemoved);
+        keys.addAll(deltaAdded.keySet());
+        keys.addAll(deltaChanged.keySet());
+        return keys;
+    }
+
+    public int unsavedChangesCount() {
+        return deltaAdded.size() + deltaChanged.size() + deltaRemoved.size();
+    }
 
     public void loadDBData() {
-       /* committedData.clear();
+        committedData.clear();
         deltaAdded.clear();
         deltaChanged.clear();
         deltaRemoved.clear();
         File[] tableDirs = curDB.listFiles();
         for (File dir : tableDirs) {
-            if (dir.getName().equals(".DS_Store")) {
+            if (dir.getName().equals(".DS_Store") || dir.getName().equals("signature.tsv")) {
                 continue;
             }
             File[] tableFiles = dir.listFiles();
@@ -208,18 +203,24 @@ public class StoreableDataTable implements Table {
                         byte[] value = new byte[valueLength];
 
                         byteBuffer.get(value, 0, valueLength);
-                        committedData.put(new String(key, "UTF-8"), new String(value, "UTF-8"));
+                        try {
+                            Storeable row = new StoreableDataTableProviderFactory().create(curDB.getParent()).deserialize(this, new String(value, "UTF-8"));
+                            committedData.put(new String(key, "UTF-8"), row);
+                        }
+                        catch (ParseException e) {
+                            throw new RuntimeException(e.getMessage());
+                        }
                     }
                 } catch (IOException e) {
                     System.err.println("error reading file" + e.toString()
                     );
                 }
             }
-        }*/
+        }
     }
 
     public void save() {
-        /*for (int i = 0; i < 16; ++i) {
+        for (int i = 0; i < 16; ++i) {
             try {
                 Path dirName = Paths.get(curDB.getCanonicalPath()).resolve(i + ".dir/");
                 if (!Files.exists(dirName)) {
@@ -242,7 +243,7 @@ public class StoreableDataTable implements Table {
         try {
             for (Map.Entry<String, Storeable> entry : committedData.entrySet()) {
                 String key = entry.getKey();
-                String value = entry.getValue();
+                Storeable row = entry.getValue();
                 int hashcode = Math.abs(key.hashCode());
                 int ndirectory = hashcode % 16;
                 int nfile = hashcode / 16 % 16;
@@ -257,6 +258,7 @@ public class StoreableDataTable implements Table {
                 byte[] keyInBytes = new byte[0];
                 byte[] valueInBytes = new byte[0];
                 keyInBytes = key.getBytes("UTF-8");
+                String value = new StoreableDataTableProviderFactory().create(curDB.getParent()).serialize(this, row);
                 valueInBytes = value.getBytes("UTF-8");
                 ByteBuffer bb = ByteBuffer.allocate(8 + keyInBytes.length + valueInBytes.length);
                 bb.putInt(keyInBytes.length);
@@ -316,9 +318,52 @@ public class StoreableDataTable implements Table {
                     continue;
                 }
             }
-        }*/
+        }
     }
 
+    public void setColumnTypes(List<Class<?>> columnTypes) throws IOException {
+        this.columnTypes = columnTypes;
+        File signatureFile = new File(dbPath, "signature.tsv");
+        if (!signatureFile.exists()) {
+            signatureFile.createNewFile();
+        }
+        FileOutputStream out = new FileOutputStream(signatureFile);
+        try {
+            StringBuffer res = new StringBuffer();
+            for (Class<?> type : columnTypes) {
+                String name = type.getSimpleName();
+                switch (name) {
+                    case "Integer":
+                        res.append("int ");
+                        break;
+                    case "Long":
+                        res.append("long ");
+                        break;
+                    case "Byte":
+                        res.append("byte ");
+                        break;
+                    case "Float":
+                        res.append("float ");
+                        break;
+                    case "Double":
+                        res.append("double ");
+                        break;
+                    case "Boolean":
+                        res.append("boolean ");
+                        break;
+                    case "String":
+                        res.append("String ");
+                        break;
+                    default:
+                        throw new RuntimeException("Incorrect type");
+                }
+            }
+            res.setLength(res.length() - 1);
+            out.write((res.toString()).getBytes("UTF-8"));
+        } catch (IOException e) {
+            throw new RuntimeException("error writing signature");
+        }
+    }
     public static void fileDelete(File myDir) {
         if (myDir.isDirectory()) {
             File[] content = myDir.listFiles();
@@ -328,5 +373,6 @@ public class StoreableDataTable implements Table {
         }
         myDir.delete();
     }
+
 
 }
