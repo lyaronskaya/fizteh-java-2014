@@ -9,7 +9,7 @@ abstract class Command {
         return name;
     }
 
-    abstract boolean execute(String[] args) throws Exception;
+    abstract boolean execute(String[] args) throws MultiFileMapRunTimeException;
 
 }
 

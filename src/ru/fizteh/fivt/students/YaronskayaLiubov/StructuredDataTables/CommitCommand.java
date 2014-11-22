@@ -11,7 +11,7 @@ public class CommitCommand extends Command {
         numberOfArguments = 1;
     }
 
-    boolean execute(String[] args) throws IOException {
+    boolean execute(String[] args) throws MultiFileMapRunTimeException {
         if (args.length != numberOfArguments) {
             System.err.println(name + ": wrong number of arguements");
             return false;

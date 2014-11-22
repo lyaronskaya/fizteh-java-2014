@@ -52,11 +52,12 @@ public class StoreableDataTableProvider implements TableProvider {
     }
 
     @Override
-    public Table createTable(String name, List<Class<?>> columnTypes) throws IOException {
+    public Table createTable(String name, List<Class<?>> columnTypes) {
         CheckParameters.checkTableName(name);
         CheckParameters.checkColumnTypesList(columnTypes);
         StoreableDataTable newTable = new StoreableDataTable(dbDir + File.separator + name);
         newTable.setColumnTypes(columnTypes);
+
         if (tables.get(name) == null) {
             tables.put(name, newTable);
             return newTable;
@@ -65,7 +66,7 @@ public class StoreableDataTableProvider implements TableProvider {
     }
 
     @Override
-    public void removeTable(String name) throws IOException {
+    public void removeTable(String name) {
         CheckParameters.checkTableName(name);
         if (tables.remove(name) == null) {
             throw new IllegalStateException("table '" + name + "' does not exist");

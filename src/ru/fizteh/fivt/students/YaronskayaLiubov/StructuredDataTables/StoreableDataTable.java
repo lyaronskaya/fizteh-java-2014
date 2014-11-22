@@ -4,10 +4,7 @@ import ru.fizteh.fivt.storage.structured.ColumnFormatException;
 import ru.fizteh.fivt.storage.structured.Storeable;
 import ru.fizteh.fivt.storage.structured.Table;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -120,12 +117,11 @@ public class StoreableDataTable implements Table {
     }
 
     @Override
-    public int commit() throws IOException {
+    public int commit() {
         int deltaCount = deltaAdded.size() + deltaChanged.size() + deltaRemoved.size();
         committedData.putAll(deltaAdded);
         committedData.putAll(deltaChanged);
         committedData.keySet().removeAll(deltaRemoved);
-        //save();
         deltaAdded.clear();
         deltaChanged.clear();
         deltaRemoved.clear();
@@ -212,7 +208,7 @@ public class StoreableDataTable implements Table {
                         }
                     }
                 } catch (IOException e) {
-                    System.err.println("error reading file" + e.toString()
+                    System.err.println("error reading file: " + e.getMessage()
                     );
                 }
             }
@@ -222,7 +218,7 @@ public class StoreableDataTable implements Table {
     public void save() {
         for (int i = 0; i < 16; ++i) {
             try {
-                Path dirName = Paths.get(curDB.getCanonicalPath()).resolve(i + ".dir/");
+                Path dirName = Paths.get(curDB.getCanonicalPath()).resolve(i + ".dir");
                 if (!Files.exists(dirName)) {
                     Files.createDirectory(dirName);
                 }
@@ -233,7 +229,7 @@ public class StoreableDataTable implements Table {
                     }
                 }
             } catch (IOException e) {
-                System.err.println("error creating directory");
+                System.err.println("error writing on disk");
             }
         }
 
@@ -259,6 +255,7 @@ public class StoreableDataTable implements Table {
                 byte[] valueInBytes = new byte[0];
                 keyInBytes = key.getBytes("UTF-8");
                 String value = new StoreableDataTableProviderFactory().create(curDB.getParent()).serialize(this, row);
+                System.out.println("value" + value);
                 valueInBytes = value.getBytes("UTF-8");
                 ByteBuffer bb = ByteBuffer.allocate(8 + keyInBytes.length + valueInBytes.length);
                 bb.putInt(keyInBytes.length);
@@ -321,47 +318,57 @@ public class StoreableDataTable implements Table {
         }
     }
 
-    public void setColumnTypes(List<Class<?>> columnTypes) throws IOException {
+    public void setColumnTypes(List<Class<?>> columnTypes) {
         this.columnTypes = columnTypes;
         File signatureFile = new File(dbPath, "signature.tsv");
         if (!signatureFile.exists()) {
-            signatureFile.createNewFile();
-        }
-        FileOutputStream out = new FileOutputStream(signatureFile);
-        try {
-            StringBuffer res = new StringBuffer();
-            for (Class<?> type : columnTypes) {
-                String name = type.getSimpleName();
-                switch (name) {
-                    case "Integer":
-                        res.append("int ");
-                        break;
-                    case "Long":
-                        res.append("long ");
-                        break;
-                    case "Byte":
-                        res.append("byte ");
-                        break;
-                    case "Float":
-                        res.append("float ");
-                        break;
-                    case "Double":
-                        res.append("double ");
-                        break;
-                    case "Boolean":
-                        res.append("boolean ");
-                        break;
-                    case "String":
-                        res.append("String ");
-                        break;
-                    default:
-                        throw new RuntimeException("Incorrect type");
-                }
+            try {
+                signatureFile.createNewFile();
+            } catch (IOException e) {
+                throw new RuntimeException("error creating signature file");
             }
-            res.setLength(res.length() - 1);
-            out.write((res.toString()).getBytes("UTF-8"));
+        }
+        try (FileOutputStream out = new FileOutputStream(signatureFile)) {
+
+            try {
+                StringBuffer res = new StringBuffer();
+                for (Class<?> type : columnTypes) {
+                    String name = type.getSimpleName();
+                    switch (name) {
+                        case "Integer":
+                            res.append("int ");
+                            break;
+                        case "Long":
+                            res.append("long ");
+                            break;
+                        case "Byte":
+                            res.append("byte ");
+                            break;
+                        case "Float":
+                            res.append("float ");
+                            break;
+                        case "Double":
+                            res.append("double ");
+                            break;
+                        case "Boolean":
+                            res.append("boolean ");
+                            break;
+                        case "String":
+                            res.append("String ");
+                            break;
+                        default:
+                            throw new RuntimeException("Incorrect type");
+                    }
+                }
+                res.setLength(res.length() - 1);
+                out.write((res.toString()).getBytes("UTF-8"));
+            } catch (IOException e) {
+                throw new RuntimeException("error writing signature");
+            }
+        } catch (FileNotFoundException e) {
+            //file never not found
         } catch (IOException e) {
-            throw new RuntimeException("error writing signature");
+            //
         }
     }
 

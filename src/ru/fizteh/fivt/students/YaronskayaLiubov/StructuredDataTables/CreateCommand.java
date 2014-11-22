@@ -14,7 +14,7 @@ public class CreateCommand extends Command {
         numberOfArguments = 3;
     }
 
-    boolean execute(String[] args) throws IncorrectTableSignatureException, IOException {
+    boolean execute(String[] args) throws MultiFileMapRunTimeException {
         if (args.length < numberOfArguments) {
             System.err.println(name + ": wrong number of arguements");
             return false;
@@ -27,7 +27,7 @@ public class CreateCommand extends Command {
         }
         String types = sb.toString().trim();
         if (!(types.startsWith("(") && types.endsWith(")"))) {
-            throw new IncorrectTableSignatureException("Incorrect column type format");
+            throw new MultiFileMapRunTimeException("Incorrect column type format");
         }
         types = types.substring(1, types.length() - 1);
         Scanner scanner = new Scanner(types);
@@ -58,12 +58,13 @@ public class CreateCommand extends Command {
                     columnClass = String.class;
                     break;
                 default:
-                    throw new IncorrectTableSignatureException("Undefined column type '" + type + "'");
+                    throw new MultiFileMapRunTimeException("Undefined column type '" + type + "'");
             }
             columnTypes.add(columnClass);
         }
-
-        MultiFileHashMap.provider.createTable(args[1], columnTypes);
+        if (MultiFileHashMap.provider.createTable(tableName, columnTypes) == null) {
+            throw new MultiFileMapRunTimeException(tableName + " exists");
+        }
         return true;
     }
 }

@@ -35,7 +35,7 @@ public class CheckParameters {
         }
     }
 
-    public static void checkTableName(String name) {
+    public static void checkTableName(String name) throws IllegalArgumentException {
         if (name == null) {
             throw new IllegalArgumentException("table name is null");
         }

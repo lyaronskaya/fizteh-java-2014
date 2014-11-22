@@ -14,7 +14,7 @@ public class DropCommand extends Command {
         numberOfArguments = 2;
     }
 
-    boolean execute(String[] args) throws IOException {
+    boolean execute(String[] args) {
         if (args.length != numberOfArguments) {
             System.err.println(name + ": wrong number of arguements");
             return false;

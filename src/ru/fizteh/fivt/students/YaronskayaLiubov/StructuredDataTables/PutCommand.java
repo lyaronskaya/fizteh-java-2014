@@ -13,7 +13,7 @@ public class PutCommand extends Command {
         numberOfArguments = 3;
     }
 
-    boolean execute(String[] args) throws ParseException {
+    boolean execute(String[] args) throws MultiFileMapRunTimeException {
         if (args.length != numberOfArguments) {
             System.err.println(name + ": wrong number of arguements");
             return false;
@@ -22,13 +22,21 @@ public class PutCommand extends Command {
             System.err.println("no table");
             return false;
         }
-        Storeable row = MultiFileHashMap.provider.deserialize(MultiFileHashMap.currTable, args[2]);
-        Storeable old = MultiFileHashMap.currTable.put(args[1], row);
-        if (old != null) {
-            System.out.println("overwrite");
-            System.out.println(MultiFileHashMap.provider.serialize(MultiFileHashMap.currTable, old));
-        } else {
-            System.out.println("new");
+        System.out.println("COlumn type " + MultiFileHashMap.currTable.getColumnType(0).toString());
+        //System.out.println("Your key " + args[1]);
+        //System.out.println(args[2] + "args");
+
+        try {
+            Storeable row = MultiFileHashMap.provider.deserialize(MultiFileHashMap.currTable, args[2]);
+            Storeable old = MultiFileHashMap.currTable.put(args[1], row);
+            if (old != null) {
+                System.out.println("overwrite");
+                System.out.println(MultiFileHashMap.provider.serialize(MultiFileHashMap.currTable, old));
+            } else {
+                System.out.println("new");
+            }
+        } catch (ParseException e) {
+            throw new MultiFileMapRunTimeException(e.getMessage());
         }
         return true;
     }

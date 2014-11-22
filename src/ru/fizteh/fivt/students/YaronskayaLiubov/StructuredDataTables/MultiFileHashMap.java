@@ -98,7 +98,9 @@ public class MultiFileHashMap {
                         errorOccurred = true;
                     }
                 } catch (Exception e) {
-                    System.err.println(e.getMessage());
+                    System.err.println("execution exception");
+                    //e.printStackTrace();
+                    errorOccurred = true;
                 }
             }
         }
