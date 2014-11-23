@@ -1,5 +1,6 @@
 package ru.fizteh.fivt.students.YaronskayaLiubov.StructuredDataTables;
 
+import ru.fizteh.fivt.storage.strings.TableProvider;
 import ru.fizteh.fivt.storage.structured.ColumnFormatException;
 import ru.fizteh.fivt.storage.structured.Storeable;
 import ru.fizteh.fivt.storage.structured.Table;
@@ -21,12 +22,13 @@ public class StoreableDataTable implements Table {
     protected File curDB;
     public String dbPath;
     private List<Class<?>> columnTypes;
+    private StoreableDataTableProvider provider;
     private HashMap<String, Storeable> committedData;
     private HashMap<String, Storeable> deltaAdded;
     private HashMap<String, Storeable> deltaChanged;
     private HashSet<String> deltaRemoved;
 
-    protected StoreableDataTable(String dbPath) {
+    protected StoreableDataTable(StoreableDataTableProvider provider, String dbPath) {
         if (!Files.exists(Paths.get(dbPath))) {
             try {
                 Files.createDirectory(Paths.get(dbPath));
@@ -38,6 +40,7 @@ public class StoreableDataTable implements Table {
             throw new IllegalArgumentException(dbPath + "is not a directory");
         }
         this.dbPath = dbPath;
+        this.provider = provider;
         curDB = new File(dbPath);
         committedData = new HashMap<String, Storeable>();
         deltaAdded = new HashMap<String, Storeable>();
@@ -201,7 +204,7 @@ public class StoreableDataTable implements Table {
 
                         byteBuffer.get(value, 0, valueLength);
                         try {
-                            Storeable row = new StoreableDataTableProviderFactory().create(curDB.getParent()).deserialize(this, new String(value, "UTF-8"));
+                            Storeable row = provider.deserialize(this, new String(value, "UTF-8"));
                             committedData.put(new String(key, "UTF-8"), row);
                         } catch (ParseException e) {
                             throw new RuntimeException(e.getMessage());
@@ -254,7 +257,7 @@ public class StoreableDataTable implements Table {
                 byte[] keyInBytes = new byte[0];
                 byte[] valueInBytes = new byte[0];
                 keyInBytes = key.getBytes("UTF-8");
-                String value = new StoreableDataTableProviderFactory().create(curDB.getParent()).serialize(this, row);
+                String value = provider.serialize(this, row);
                 System.out.println("value" + value);
                 valueInBytes = value.getBytes("UTF-8");
                 ByteBuffer bb = ByteBuffer.allocate(8 + keyInBytes.length + valueInBytes.length);

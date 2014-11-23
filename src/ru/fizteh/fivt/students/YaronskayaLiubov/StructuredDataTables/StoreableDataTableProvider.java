@@ -40,7 +40,7 @@ public class StoreableDataTableProvider implements TableProvider {
         for (String s : tableNames) {
             Path tableName = Paths.get(dbDir).resolve(s);
             if (Files.isDirectory(tableName)) {
-                tables.put(s, new StoreableDataTable(tableName.toString()));
+                tables.put(s, new StoreableDataTable(this, tableName.toString()));
             }
         }
     }
@@ -55,7 +55,7 @@ public class StoreableDataTableProvider implements TableProvider {
     public Table createTable(String name, List<Class<?>> columnTypes) {
         CheckParameters.checkTableName(name);
         CheckParameters.checkColumnTypesList(columnTypes);
-        StoreableDataTable newTable = new StoreableDataTable(dbDir + File.separator + name);
+        StoreableDataTable newTable = new StoreableDataTable(this, dbDir + File.separator + name);
         newTable.setColumnTypes(columnTypes);
 
         if (tables.get(name) == null) {
