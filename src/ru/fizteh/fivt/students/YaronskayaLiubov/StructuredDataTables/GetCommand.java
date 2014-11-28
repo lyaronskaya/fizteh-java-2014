@@ -21,8 +21,14 @@ public class GetCommand extends Command {
             return false;
         }
         Storeable row = MultiFileHashMap.currTable.get(args[1]);
-
-        System.out.println((row == null) ? "not found" : MultiFileHashMap.provider.serialize(MultiFileHashMap.currTable, row));
+        if (row == null) {
+            System.out.println("not found");
+        } else {
+            for (int i = 0; i < MultiFileHashMap.currTable.getColumnsCount(); ++i) {
+                System.out.print(row.getColumnAt(i) + " ");
+            }
+            System.out.println();
+        }
         return true;
     }
 }

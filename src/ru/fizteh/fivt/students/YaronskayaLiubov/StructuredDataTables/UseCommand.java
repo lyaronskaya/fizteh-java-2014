@@ -9,7 +9,7 @@ public class UseCommand extends Command {
         numberOfArguments = 2;
     }
 
-    boolean execute(String[] args) throws UnsavedChangesException {
+    boolean execute(String[] args) throws MultiFileMapRunTimeException {
         if (args.length != numberOfArguments) {
             System.err.println(name + ": wrong number of arguements");
             return false;
@@ -20,11 +20,11 @@ public class UseCommand extends Command {
         if (table == null) {
             System.out.println(tableName + " not exists");
         } else {
-            System.out.println("created column type " + table.getColumnType(0).toString());
+            //System.out.println("created column type " + table.getColumnType(0).toString());
             if (MultiFileHashMap.currTable != null) {
                 int unsavedChanges = MultiFileHashMap.currTable.unsavedChangesCount();
                 if (unsavedChanges > 0) {
-                    throw new UnsavedChangesException(unsavedChanges + " unsaved changes");
+                    throw new MultiFileMapRunTimeException(unsavedChanges + " unsaved changes");
                 }
             }
             MultiFileHashMap.currTable = table;

@@ -178,10 +178,18 @@ public class StoreableDataTable implements Table {
         deltaRemoved.clear();
         File[] tableDirs = curDB.listFiles();
         for (File dir : tableDirs) {
-            if (dir.getName().equals(".DS_Store") || dir.getName().equals("signature.tsv")) {
+            if (dir.getName().equals(".DS_Store")) {
                 continue;
             }
-            File[] tableFiles = dir.listFiles();
+            if (dir.getName().equals("signature.tsv")) {
+                try {
+                    loadSignature(dir);
+                } catch (UndefinedColumnTypeException e) {
+                    System.err.println(e.getMessage());
+                }
+                continue;
+            }
+            /*File[] tableFiles = dir.listFiles();
             if (tableFiles.length == 0) {
                 continue;
             }
@@ -214,7 +222,7 @@ public class StoreableDataTable implements Table {
                     System.err.println("error reading file: " + e.getMessage()
                     );
                 }
-            }
+            }*/
         }
     }
 
@@ -254,12 +262,9 @@ public class StoreableDataTable implements Table {
                     fos[ndirectory][nfile] = new FileOutputStream(dbPath + File.separator + ndirectory + ".dir"
                             + File.separator + nfile + ".dat");
                 }
-                byte[] keyInBytes = new byte[0];
-                byte[] valueInBytes = new byte[0];
-                keyInBytes = key.getBytes("UTF-8");
+                byte[] keyInBytes = key.getBytes("UTF-8");
                 String value = provider.serialize(this, row);
-                System.out.println("value" + value);
-                valueInBytes = value.getBytes("UTF-8");
+                byte[] valueInBytes = value.getBytes("UTF-8");
                 ByteBuffer bb = ByteBuffer.allocate(8 + keyInBytes.length + valueInBytes.length);
                 bb.putInt(keyInBytes.length);
                 bb.put(keyInBytes);
@@ -385,5 +390,15 @@ public class StoreableDataTable implements Table {
         myDir.delete();
     }
 
+    private void loadSignature(File signatureFile) throws UndefinedColumnTypeException {
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(signatureFile));
+            String stringSignature = reader.readLine();
+            List<String> columnTypesList = Arrays.asList(stringSignature.split("\\s+"));
+            this.columnTypes = provider.typelistToClassList(columnTypesList);
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+        }
+    }
 
 }

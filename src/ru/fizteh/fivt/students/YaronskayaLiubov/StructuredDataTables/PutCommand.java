@@ -13,18 +13,16 @@ public class PutCommand extends Command {
         numberOfArguments = 3;
     }
 
-    boolean execute(String[] args) throws MultiFileMapRunTimeException {
+    boolean execute(String[] args) {
         if (args.length != numberOfArguments) {
             System.err.println(name + ": wrong number of arguements");
             return false;
         }
+
         if (MultiFileHashMap.currTable == null) {
             System.err.println("no table");
             return false;
         }
-        System.out.println("COlumn type " + MultiFileHashMap.currTable.getColumnType(0).toString());
-        //System.out.println("Your key " + args[1]);
-        //System.out.println(args[2] + "args");
 
         try {
             Storeable row = MultiFileHashMap.provider.deserialize(MultiFileHashMap.currTable, args[2]);
@@ -36,7 +34,7 @@ public class PutCommand extends Command {
                 System.out.println("new");
             }
         } catch (ParseException e) {
-            throw new MultiFileMapRunTimeException(e.getMessage());
+            e.printStackTrace();
         }
         return true;
     }

@@ -18,11 +18,11 @@ public class MultiFileHashMap {
     private static HashMap<String, Command> multiFileHashMapCommands;
     public static boolean errorOccurred;
 
-    public boolean exec(String[] args) throws IOException {
+    public MultiFileHashMap() {
         dbDir = System.getProperty("fizteh.db.dir");
         if (dbDir == null) {
             System.err.println("database unspecified in properties");
-            return false;
+            //return false;
         }
         if (!Files.exists(Paths.get(dbDir))) {
             try {
@@ -31,7 +31,11 @@ public class MultiFileHashMap {
                 System.err.println("error creating database " + dbDir);
             }
         }
-        provider = (StoreableDataTableProvider) new StoreableDataTableProviderFactory().create(dbDir);
+        try {
+            provider = (StoreableDataTableProvider) new StoreableDataTableProviderFactory().create(dbDir);
+        } catch (IOException e) {
+            System.err.println("catch ioexcetion in ctor");
+        }
         multiFileHashMapCommands = new HashMap<String, Command>();
         multiFileHashMapCommands.put("commit", new CommitCommand());
         multiFileHashMapCommands.put("create", new CreateCommand());
@@ -45,6 +49,9 @@ public class MultiFileHashMap {
         multiFileHashMapCommands.put("show", new ShowCommand());
         multiFileHashMapCommands.put("use", new UseCommand());
 
+    }
+
+    public boolean exec(String[] args) {
         if (args.length == 0) {
             while (true) {
                 System.out.print(System.getProperty("user.dir") + "$ ");
@@ -100,8 +107,8 @@ public class MultiFileHashMap {
                         errorOccurred = true;
                     }
                 } catch (Exception e) {
-                    System.err.println("execution exception");
-                    e.printStackTrace();
+                    System.err.println(curCommand + ": " + e.getMessage());
+                    //e.printStackTrace();
                     errorOccurred = true;
                 }
             }

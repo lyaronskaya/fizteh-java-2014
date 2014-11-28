@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -189,6 +190,37 @@ public class StoreableDataTableProvider implements TableProvider {
             default:
                 throw new IOException("Undefined type of value");
         }
+    }
+
+    public static Class<?> typenameToClass(String typeName) throws UndefinedColumnTypeException {
+        switch (typeName) {
+            case "int":
+                return Integer.class;
+            case "long":
+                return Long.class;
+            case "byte":
+                return Byte.class;
+            case "float":
+                return Float.class;
+            case "double":
+                return Double.class;
+            case "boolean":
+                return Boolean.class;
+            case "String":
+                return String.class;
+            default:
+                throw new UndefinedColumnTypeException("Undefined column type '" + typeName + "'");
+        }
+    }
+
+    public static List<Class<?>> typelistToClassList(List<String> stringList) throws UndefinedColumnTypeException {
+        List<Class<?>> columnTypes = new ArrayList<>();
+        for (int i = 0; i < stringList.size(); ++i) {
+            String type = stringList.get(i);
+            Class<?> columnClass = columnClass = typenameToClass(type);
+            columnTypes.add(columnClass);
+        }
+        return columnTypes;
     }
 
     public HashMap<String, StoreableDataTable> getTables() {
