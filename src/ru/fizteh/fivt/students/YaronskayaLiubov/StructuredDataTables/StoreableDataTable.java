@@ -55,16 +55,15 @@ public class StoreableDataTable implements Table {
     @Override
     public Storeable get(String key) {
         CheckParameters.checkKey(key);
+
         if (deltaRemoved.contains(key)) {
             return null;
         }
-        Storeable value = deltaAdded.get(key);
-        if (value != null) {
-            return value;
+        if (deltaAdded.containsKey(key)) {
+            return deltaAdded.get(key);
         }
-        value = deltaChanged.get(key);
-        if (value != null) {
-            return value;
+        if (deltaChanged.containsKey(key)) {
+            return deltaChanged.get(key);
         }
         return committedData.get(key);
     }
@@ -75,20 +74,15 @@ public class StoreableDataTable implements Table {
         CheckParameters.checkValue(value);
 
         Storeable oldValue = null;
-        if (deltaRemoved.contains(key)) {
-            deltaAdded.put(key, value);
+
+        if (deltaChanged.containsKey(key)) {
+            oldValue = deltaChanged.put(key, value);
         } else {
-            if (deltaAdded.containsKey(key)) {
-                oldValue = deltaAdded.remove(key);
+            if (committedData.containsKey(key)) {
+                oldValue = committedData.get(key);
                 deltaChanged.put(key, value);
             } else {
-                if (deltaChanged.containsKey(key)) {
-                    oldValue = deltaChanged.get(key);
-                    deltaChanged.put(key, value);
-                } else {
-                    oldValue = committedData.get(key);
-                    deltaAdded.put(key, value);
-                }
+                oldValue = deltaAdded.put(key, value);
             }
         }
         return oldValue;
@@ -99,22 +93,23 @@ public class StoreableDataTable implements Table {
         CheckParameters.checkKey(key);
 
         Storeable value = null;
-        if (deltaAdded.containsKey(key)) {
-            value = deltaAdded.remove(key);
-        } else {
+        if (committedData.containsKey(key)) {
             if (deltaChanged.containsKey(key)) {
                 value = deltaChanged.remove(key);
             } else {
-                value = committedData.remove(key);
+                deltaRemoved.add(key);
+            }
+        } else {
+            if (deltaAdded.containsKey(key)) {
+                value = deltaAdded.remove(key);
             }
         }
-        deltaRemoved.add(key);
         return value;
     }
 
     @Override
     public int size() {
-        return committedData.size() + deltaAdded.size() + deltaChanged.size();
+        return committedData.size() + deltaAdded.size() - deltaRemoved.size();
     }
 
     @Override
@@ -158,10 +153,9 @@ public class StoreableDataTable implements Table {
     }
 
     public List<String> list() {
-        List<String> keys = new ArrayList<String>(committedData.keySet());
+        List<String> keys = new ArrayList<>(committedData.keySet());
         keys.removeAll(deltaRemoved);
         keys.addAll(deltaAdded.keySet());
-        keys.addAll(deltaChanged.keySet());
         return keys;
     }
 
@@ -229,16 +223,6 @@ public class StoreableDataTable implements Table {
     public void save() {
         for (int i = 0; i < 16; ++i) {
             try {
-                /*Path dirName = Paths.get(curDB.getCanonicalPath()).resolve(i + ".dir");
-                if (!Files.exists(dirName)) {
-                    Files.createDirectories(dirName);
-                }
-                for (int j = 0; j < 16; ++j) {
-                    Path fileName = dirName.resolve(j + ".dat");
-                    if (!Files.exists(fileName)) {
-                        Files.createFile(fileName);
-                    }
-                }*/
                 File dir = new File(dbPath, i + ".dir");
                 dir.mkdirs();
                 if (!dir.exists()) {
@@ -337,60 +321,6 @@ public class StoreableDataTable implements Table {
             }
         }
     }
-
-    /*public void setColumnTypes(List<Class<?>> columnTypes) {
-        this.columnTypes = columnTypes;
-        File signatureFile = new File(dbPath, "signature.tsv");
-        if (!signatureFile.exists()) {
-            try {
-                signatureFile.createNewFile();
-            } catch (IOException e) {
-                throw new RuntimeException("error creating signature file");
-            }
-        }
-        try (FileOutputStream out = new FileOutputStream(signatureFile)) {
-
-            try {
-                StringBuffer res = new StringBuffer();
-                for (Class<?> type : columnTypes) {
-                    String name = type.getSimpleName();
-                    switch (name) {
-                        case "Integer":
-                            res.append("int ");
-                            break;
-                        case "Long":
-                            res.append("long ");
-                            break;
-                        case "Byte":
-                            res.append("byte ");
-                            break;
-                        case "Float":
-                            res.append("float ");
-                            break;
-                        case "Double":
-                            res.append("double ");
-                            break;
-                        case "Boolean":
-                            res.append("boolean ");
-                            break;
-                        case "String":
-                            res.append("String ");
-                            break;
-                        default:
-                            throw new RuntimeException("Incorrect type");
-                    }
-                }
-                res.setLength(res.length() - 1);
-                out.write((res.toString()).getBytes("UTF-8"));
-            } catch (IOException e) {
-                throw new RuntimeException("error writing signature");
-            }
-        } catch (FileNotFoundException e) {
-            //file never not found
-        } catch (IOException e) {
-            //
-        }
-    }*/
 
     public static void fileDelete(File myDir) {
         if (myDir.isDirectory()) {

@@ -18,7 +18,7 @@ public class ListCommand extends Command {
             System.err.println("no table");
             return false;
         }
-        boolean moreThenOne = false;
+        /*boolean moreThenOne = false;
         for (String key : MultiFileHashMap.currTable.list()) {
             System.out.print(moreThenOne ? ", " : "");
             System.out.print(key);
@@ -26,7 +26,8 @@ public class ListCommand extends Command {
         }
         if (MultiFileHashMap.currTable.list().size() > 0) {
             System.out.println();
-        }
+        }*/
+        System.out.println(String.join(", ", MultiFileHashMap.currTable.list()));
         return true;
     }
 }

@@ -61,7 +61,7 @@ public class StoreableDataTableProvider implements TableProvider {
         }
         String tableDir = dbDir + File.separator + name;
         createSignatureFile(tableDir, "signature.tsv", columnTypes);
-        StoreableDataTable newTable = new StoreableDataTable(this, dbDir + File.separator + name);
+        StoreableDataTable newTable = new StoreableDataTable(this, tableDir);
         tables.put(name, newTable);
         return newTable;
     }
@@ -228,10 +228,10 @@ public class StoreableDataTableProvider implements TableProvider {
     }
 
     public static void createSignatureFile(String dir, String fileName, List<Class<?>> columnTypes) {
-        File signatureFile = new File(dir, "signature.tsv");
-        System.out.println(signatureFile.getAbsolutePath());
+        File signatureFile = new File(dir + File.separator + "signature.tsv");
         if (!signatureFile.exists()) {
             try {
+                Files.createDirectory(Paths.get(dir));
                 signatureFile.createNewFile();
             } catch (IOException e) {
                 throw new RuntimeException("error creating signature file: " + e.getMessage());
