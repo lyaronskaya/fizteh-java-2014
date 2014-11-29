@@ -27,7 +27,7 @@ public class StoreableDataTableProvider implements TableProvider {
         if (dir == null) {
             throw new IllegalArgumentException("directory name is null");
         }
-        
+
         this.dbDir = dir;
         if (!Files.exists(Paths.get(dbDir))) {
             try {
