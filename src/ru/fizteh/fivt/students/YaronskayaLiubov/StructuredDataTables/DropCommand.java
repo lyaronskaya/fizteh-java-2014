@@ -14,22 +14,22 @@ public class DropCommand extends Command {
         numberOfArguments = 2;
     }
 
-    boolean execute(String[] args) {
+    boolean execute(MultiFileHashMap multiFileHashMap, String[] args) {
         if (args.length != numberOfArguments) {
             System.err.println(name + ": wrong number of arguements");
             return false;
         }
-        Table db = MultiFileHashMap.provider.getTable(args[1]);
+        Table db = multiFileHashMap.provider.getTable(args[1]);
 
         if (db == null) {
             System.out.println(args[1] + " not exist");
             return true;
         }
-        if (MultiFileHashMap.currTable == db) {
-            MultiFileHashMap.currTable = null;
+        if (multiFileHashMap.currTable == db) {
+            multiFileHashMap.currTable = null;
         }
 
-        MultiFileHashMap.provider.removeTable(args[1]);
+        multiFileHashMap.provider.removeTable(args[1]);
         System.out.println("dropped");
         return true;
     }

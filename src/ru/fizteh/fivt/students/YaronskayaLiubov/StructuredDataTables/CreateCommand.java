@@ -1,6 +1,5 @@
 package ru.fizteh.fivt.students.YaronskayaLiubov.StructuredDataTables;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -14,7 +13,7 @@ public class CreateCommand extends Command {
         numberOfArguments = 3;
     }
 
-    boolean execute(String[] args) throws MultiFileMapRunTimeException {
+    boolean execute(MultiFileHashMap multiFileHashMap, String[] args) throws MultiFileMapRunTimeException {
         if (args.length < numberOfArguments) {
             System.err.println(name + ": wrong number of arguements");
             return false;
@@ -62,7 +61,7 @@ public class CreateCommand extends Command {
             }
             columnTypes.add(columnClass);
         }
-        if (MultiFileHashMap.provider.createTable(tableName, columnTypes) == null) {
+        if (multiFileHashMap.provider.createTable(tableName, columnTypes) == null) {
             System.out.println(tableName + " exists");
         }
         return true;

@@ -13,20 +13,20 @@ public class PutCommand extends Command {
         numberOfArguments = 3;
     }
 
-    boolean execute(String[] args) {
+    boolean execute(MultiFileHashMap multiFileHashMap, String[] args) {
         if (args.length != numberOfArguments) {
             System.err.println(name + ": wrong number of arguements");
             return false;
         }
 
-        if (MultiFileHashMap.currTable == null) {
+        if (multiFileHashMap.currTable == null) {
             System.err.println("no table");
             return false;
         }
 
         try {
-            Storeable row = MultiFileHashMap.provider.deserialize(MultiFileHashMap.currTable, args[2]);
-            Storeable old = MultiFileHashMap.currTable.put(args[1], row);
+            Storeable row = multiFileHashMap.provider.deserialize(multiFileHashMap.currTable, args[2]);
+            Storeable old = multiFileHashMap.currTable.put(args[1], row);
             if (old != null) {
                 System.out.println("overwrite");
             } else {

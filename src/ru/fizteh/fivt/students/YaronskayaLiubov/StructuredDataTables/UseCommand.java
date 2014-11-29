@@ -9,25 +9,25 @@ public class UseCommand extends Command {
         numberOfArguments = 2;
     }
 
-    boolean execute(String[] args) throws MultiFileMapRunTimeException {
+    boolean execute(MultiFileHashMap multiFileHashMap, String[] args) throws MultiFileMapRunTimeException {
         if (args.length != numberOfArguments) {
             System.err.println(name + ": wrong number of arguements");
             return false;
         }
 
         String tableName = args[1];
-        StoreableDataTable table = (StoreableDataTable) MultiFileHashMap.provider.getTable(tableName);
+        StoreableDataTable table = (StoreableDataTable) multiFileHashMap.provider.getTable(tableName);
         if (table == null) {
             System.out.println(tableName + " not exists");
         } else {
             //System.out.println("created column type " + table.getColumnType(0).toString());
-            if (MultiFileHashMap.currTable != null) {
-                int unsavedChanges = MultiFileHashMap.currTable.unsavedChangesCount();
+            if (multiFileHashMap.currTable != null) {
+                int unsavedChanges = multiFileHashMap.currTable.unsavedChangesCount();
                 if (unsavedChanges > 0) {
                     throw new MultiFileMapRunTimeException(unsavedChanges + " unsaved changes");
                 }
             }
-            MultiFileHashMap.currTable = table;
+            multiFileHashMap.currTable = table;
             System.out.println("using " + tableName);
         }
         return true;

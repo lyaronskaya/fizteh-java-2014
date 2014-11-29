@@ -10,17 +10,16 @@ import java.util.Scanner;
  * Created by luba_yaronskaya on 15.11.14.
  */
 public class MultiFileHashMap {
-    public static String dbDir;
-    protected static StoreableDataTableProvider provider;
-    protected static StoreableDataTable currTable;
-    private static HashMap<String, Command> multiFileHashMapCommands;
-    public static boolean errorOccurred;
+    public String dbDir;
+    protected StoreableDataTableProvider provider;
+    protected StoreableDataTable currTable;
+    private HashMap<String, Command> multiFileHashMapCommands;
+    public boolean errorOccurred;
 
     public MultiFileHashMap() {
         dbDir = System.getProperty("fizteh.db.dir");
         if (dbDir == null) {
             System.err.println("database unspecified in properties");
-            //return false;
         }
         if (!Files.exists(Paths.get(dbDir))) {
             try {
@@ -34,7 +33,7 @@ public class MultiFileHashMap {
         } catch (IOException e) {
             //
         }
-        multiFileHashMapCommands = new HashMap<String, Command>();
+        multiFileHashMapCommands = new HashMap<>();
         multiFileHashMapCommands.put("commit", new CommitCommand());
         multiFileHashMapCommands.put("create", new CreateCommand());
         multiFileHashMapCommands.put("drop", new DropCommand());
@@ -71,7 +70,7 @@ public class MultiFileHashMap {
                         continue;
                     }
                     try {
-                        if (!multiFileHashMapCommands.get(curCommand).execute(
+                        if (!multiFileHashMapCommands.get(curCommand).execute(this,
                                 argv)) {
                             errorOccurred = true;
                         }
@@ -100,13 +99,12 @@ public class MultiFileHashMap {
                     continue;
                 }
                 try {
-                    if (!multiFileHashMapCommands.get(curCommand).execute(
+                    if (!multiFileHashMapCommands.get(curCommand).execute(this,
                             argv)) {
                         errorOccurred = true;
                     }
                 } catch (Exception e) {
                     System.err.println(curCommand + ": " + e.getMessage());
-                    //e.printStackTrace();
                     errorOccurred = true;
                 }
             }
@@ -115,7 +113,7 @@ public class MultiFileHashMap {
         return !errorOccurred;
     }
 
-    public static void save() {
+    public void save() {
         for (String tableName : provider.getTables().keySet()) {
             StoreableDataTable table = provider.tables.get(tableName);
             table.save();

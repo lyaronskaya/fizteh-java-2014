@@ -9,7 +9,7 @@ public class ShowCommand extends Command {
         numberOfArguments = 2;
     }
 
-    boolean execute(String[] args) {
+    boolean execute(MultiFileHashMap multiFileHashMap, String[] args) {
         if (args.length != numberOfArguments) {
             System.err.println(name + ": wrong number of arguements");
             return false;
@@ -18,7 +18,7 @@ public class ShowCommand extends Command {
                 System.err.println("incorrect arguement");
                 return false;
             }
-            for (StoreableDataTable table : MultiFileHashMap.provider.getTables().values()) {
+            for (StoreableDataTable table : multiFileHashMap.provider.getTables().values()) {
                 System.out.println(table.getName() + " " + table.size());
             }
             return true;

@@ -11,16 +11,16 @@ public class CommitCommand extends Command {
         numberOfArguments = 1;
     }
 
-    boolean execute(String[] args) throws MultiFileMapRunTimeException {
+    boolean execute(MultiFileHashMap multiFileHashMap, String[] args) throws MultiFileMapRunTimeException {
         if (args.length != numberOfArguments) {
             System.err.println(name + ": wrong number of arguements");
             return false;
         }
-        if (MultiFileHashMap.currTable == null) {
+        if (multiFileHashMap.currTable == null) {
             System.err.println("no table");
             return false;
         }
-        MultiFileHashMap.currTable.commit();
+        multiFileHashMap.currTable.commit();
         return true;
     }
 }

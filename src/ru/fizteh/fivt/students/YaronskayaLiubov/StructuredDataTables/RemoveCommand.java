@@ -11,16 +11,16 @@ public class RemoveCommand extends Command {
         numberOfArguments = 2;
     }
 
-    boolean execute(String[] args) {
+    boolean execute(MultiFileHashMap multiFileHashMap, String[] args) {
         if (args.length != numberOfArguments) {
             System.err.println(name + ": wrong number of arguements");
             return false;
         }
-        if (MultiFileHashMap.currTable == null) {
+        if (multiFileHashMap.currTable == null) {
             System.err.println("no table");
             return false;
         }
-        Storeable removedRow = MultiFileHashMap.currTable.remove(args[1]);
+        Storeable removedRow = multiFileHashMap.currTable.remove(args[1]);
         System.out.println((removedRow == null) ? "not found" : "removed");
         return true;
     }

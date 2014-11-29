@@ -9,13 +9,13 @@ public class ExitCommand extends Command {
         numberOfArguments = 1;
     }
 
-    boolean execute(String[] args) {
+    boolean execute(MultiFileHashMap multiFileHashMap, String[] args) {
         if (args.length != numberOfArguments) {
             System.err.println(name + ": wrong number of arguements");
             return false;
         }
-        MultiFileHashMap.save();
-        System.exit(MultiFileHashMap.errorOccurred ? 1 : 0);
+        multiFileHashMap.save();
+        System.exit(multiFileHashMap.errorOccurred ? 1 : 0);
         return true;
     }
 }
