@@ -1,6 +1,5 @@
 package ru.fizteh.fivt.students.YaronskayaLiubov.StructuredDataTables;
 
-import ru.fizteh.fivt.storage.strings.TableProvider;
 import ru.fizteh.fivt.storage.structured.ColumnFormatException;
 import ru.fizteh.fivt.storage.structured.Storeable;
 import ru.fizteh.fivt.storage.structured.Table;
@@ -9,7 +8,6 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.*;
@@ -42,10 +40,10 @@ public class StoreableDataTable implements Table {
         this.dbPath = dbPath;
         this.provider = provider;
         curDB = new File(dbPath);
-        committedData = new HashMap<String, Storeable>();
-        deltaAdded = new HashMap<String, Storeable>();
-        deltaChanged = new HashMap<String, Storeable>();
-        deltaRemoved = new HashSet<String>();
+        committedData = new HashMap<>();
+        deltaAdded = new HashMap<>();
+        deltaChanged = new HashMap<>();
+        deltaRemoved = new HashSet<>();
         loadDBData();
     }
 
@@ -176,30 +174,31 @@ public class StoreableDataTable implements Table {
         deltaAdded.clear();
         deltaChanged.clear();
         deltaRemoved.clear();
+        File signatureFile = new File(curDB, "signature.tsv");
+        if (!signatureFile.exists()) {
+            throw new SignatureFileNotFoundException("Signature file not found");
+        }
+        loadSignature(signatureFile);
+
         File[] tableDirs = curDB.listFiles();
+        if (tableDirs == null) {
+            return;
+        }
+
         for (File dir : tableDirs) {
-            if (dir.getName().equals(".DS_Store")) {
+            if (dir.getName().equals(".DS_Store") || dir.getName().equals("signature.tsv")) {
                 continue;
             }
-            if (dir.getName().equals("signature.tsv")) {
-                try {
-                    loadSignature(dir);
-                } catch (UndefinedColumnTypeException e) {
-                    System.err.println(e.getMessage());
-                }
-                continue;
-            }
-            /*File[] tableFiles = dir.listFiles();
-            if (tableFiles.length == 0) {
+
+            File[] tableFiles = dir.listFiles();
+            if (tableFiles == null) {
                 continue;
             }
             for (File tableFile : tableFiles) {
                 if (tableFile.getName().equals(".DS_Store")) {
                     continue;
                 }
-                FileChannel channel = null;
-                try {
-                    channel = new FileInputStream(tableFile.getCanonicalPath()).getChannel();
+                try (FileChannel channel = new FileInputStream(tableFile.getCanonicalPath()).getChannel()) {
 
                     ByteBuffer byteBuffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
 
@@ -218,29 +217,42 @@ public class StoreableDataTable implements Table {
                             throw new RuntimeException(e.getMessage());
                         }
                     }
+                    channel.close();
                 } catch (IOException e) {
                     System.err.println("error reading file: " + e.getMessage()
                     );
                 }
-            }*/
+            }
         }
     }
 
     public void save() {
         for (int i = 0; i < 16; ++i) {
             try {
-                Path dirName = Paths.get(curDB.getCanonicalPath()).resolve(i + ".dir");
+                /*Path dirName = Paths.get(curDB.getCanonicalPath()).resolve(i + ".dir");
                 if (!Files.exists(dirName)) {
-                    Files.createDirectory(dirName);
+                    Files.createDirectories(dirName);
                 }
                 for (int j = 0; j < 16; ++j) {
                     Path fileName = dirName.resolve(j + ".dat");
                     if (!Files.exists(fileName)) {
                         Files.createFile(fileName);
                     }
+                }*/
+                File dir = new File(dbPath, i + ".dir");
+                dir.mkdirs();
+                if (!dir.exists()) {
+                    dir.createNewFile();
+                }
+                dir.mkdirs();
+                for (int j = 0; j < 16; ++j) {
+                    File file = new File(dir, j + ".dat");
+                    if (!file.exists()) {
+                        file.createNewFile();
+                    }
                 }
             } catch (IOException e) {
-                System.err.println("error writing on disk");
+                System.err.println("error writing on disk: " + e.getMessage());
             }
         }
 
@@ -326,7 +338,7 @@ public class StoreableDataTable implements Table {
         }
     }
 
-    public void setColumnTypes(List<Class<?>> columnTypes) {
+    /*public void setColumnTypes(List<Class<?>> columnTypes) {
         this.columnTypes = columnTypes;
         File signatureFile = new File(dbPath, "signature.tsv");
         if (!signatureFile.exists()) {
@@ -378,7 +390,7 @@ public class StoreableDataTable implements Table {
         } catch (IOException e) {
             //
         }
-    }
+    }*/
 
     public static void fileDelete(File myDir) {
         if (myDir.isDirectory()) {

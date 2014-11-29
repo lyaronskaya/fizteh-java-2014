@@ -1,9 +1,7 @@
 package ru.fizteh.fivt.students.YaronskayaLiubov.StructuredDataTables;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -34,7 +32,7 @@ public class MultiFileHashMap {
         try {
             provider = (StoreableDataTableProvider) new StoreableDataTableProviderFactory().create(dbDir);
         } catch (IOException e) {
-            System.err.println("catch ioexcetion in ctor");
+            //
         }
         multiFileHashMapCommands = new HashMap<String, Command>();
         multiFileHashMapCommands.put("commit", new CommitCommand());

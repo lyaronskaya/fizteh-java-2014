@@ -63,7 +63,7 @@ public class CreateCommand extends Command {
             columnTypes.add(columnClass);
         }
         if (MultiFileHashMap.provider.createTable(tableName, columnTypes) == null) {
-            throw new MultiFileMapRunTimeException(tableName + " exists");
+            System.out.println(tableName + " exists");
         }
         return true;
     }

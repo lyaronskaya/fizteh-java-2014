@@ -6,7 +6,7 @@ package ru.fizteh.fivt.students.YaronskayaLiubov.StructuredDataTables;
 public class Main {
     public static void main(String[] args) {
         boolean errorOccurred;
-            errorOccurred = !new MultiFileHashMap().exec(args);
+        errorOccurred = !new MultiFileHashMap().exec(args);
         //System.out.println("COlumn type " + MultiFileHashMap.currTable.getColumnType(0).toString());
         if (errorOccurred) {
             System.exit(1);

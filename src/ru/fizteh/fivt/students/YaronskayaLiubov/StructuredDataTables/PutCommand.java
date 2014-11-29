@@ -29,12 +29,11 @@ public class PutCommand extends Command {
             Storeable old = MultiFileHashMap.currTable.put(args[1], row);
             if (old != null) {
                 System.out.println("overwrite");
-                System.out.println(MultiFileHashMap.provider.serialize(MultiFileHashMap.currTable, old));
             } else {
                 System.out.println("new");
             }
         } catch (ParseException e) {
-            e.printStackTrace();
+            e.getMessage();
         }
         return true;
     }

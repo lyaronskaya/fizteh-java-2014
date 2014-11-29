@@ -36,7 +36,7 @@ public class StoreableDataTableProvider implements TableProvider {
             }
         }
 
-        tables = new HashMap<String, StoreableDataTable>();
+        tables = new HashMap<>();
         String[] tableNames = new File(dbDir).list();
         for (String s : tableNames) {
             Path tableName = Paths.get(dbDir).resolve(s);
@@ -56,14 +56,14 @@ public class StoreableDataTableProvider implements TableProvider {
     public Table createTable(String name, List<Class<?>> columnTypes) {
         CheckParameters.checkTableName(name);
         CheckParameters.checkColumnTypesList(columnTypes);
-        StoreableDataTable newTable = new StoreableDataTable(this, dbDir + File.separator + name);
-        newTable.setColumnTypes(columnTypes);
-
-        if (tables.get(name) == null) {
-            tables.put(name, newTable);
-            return newTable;
+        if (!(tables.get(name) == null)) {
+            return null;
         }
-        return null;
+        String tableDir = dbDir + File.separator + name;
+        createSignatureFile(tableDir, "signature.tsv", columnTypes);
+        StoreableDataTable newTable = new StoreableDataTable(this, dbDir + File.separator + name);
+        tables.put(name, newTable);
+        return newTable;
     }
 
     @Override
@@ -225,5 +225,59 @@ public class StoreableDataTableProvider implements TableProvider {
 
     public HashMap<String, StoreableDataTable> getTables() {
         return tables;
+    }
+
+    public static void createSignatureFile(String dir, String fileName, List<Class<?>> columnTypes) {
+        File signatureFile = new File(dir, "signature.tsv");
+        System.out.println(signatureFile.getAbsolutePath());
+        if (!signatureFile.exists()) {
+            try {
+                signatureFile.createNewFile();
+            } catch (IOException e) {
+                throw new RuntimeException("error creating signature file: " + e.getMessage());
+            }
+        }
+        try (FileOutputStream out = new FileOutputStream(signatureFile)) {
+
+            try {
+                StringBuffer res = new StringBuffer();
+                for (Class<?> type : columnTypes) {
+                    String name = type.getSimpleName();
+                    switch (name) {
+                        case "Integer":
+                            res.append("int ");
+                            break;
+                        case "Long":
+                            res.append("long ");
+                            break;
+                        case "Byte":
+                            res.append("byte ");
+                            break;
+                        case "Float":
+                            res.append("float ");
+                            break;
+                        case "Double":
+                            res.append("double ");
+                            break;
+                        case "Boolean":
+                            res.append("boolean ");
+                            break;
+                        case "String":
+                            res.append("String ");
+                            break;
+                        default:
+                            throw new RuntimeException("Incorrect type");
+                    }
+                }
+                res.setLength(res.length() - 1);
+                out.write((res.toString()).getBytes("UTF-8"));
+            } catch (IOException e) {
+                throw new RuntimeException("error writing signature");
+            }
+        } catch (FileNotFoundException e) {
+            //file never not found
+        } catch (IOException e) {
+            //
+        }
     }
 }
