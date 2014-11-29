@@ -27,6 +27,7 @@ public class StoreableDataTableProvider implements TableProvider {
         if (dir == null) {
             throw new IllegalArgumentException("directory name is null");
         }
+        
         this.dbDir = dir;
         if (!Files.exists(Paths.get(dbDir))) {
             try {
@@ -217,7 +218,7 @@ public class StoreableDataTableProvider implements TableProvider {
         List<Class<?>> columnTypes = new ArrayList<>();
         for (int i = 0; i < stringList.size(); ++i) {
             String type = stringList.get(i);
-            Class<?> columnClass = columnClass = typenameToClass(type);
+            Class<?> columnClass = typenameToClass(type);
             columnTypes.add(columnClass);
         }
         return columnTypes;
