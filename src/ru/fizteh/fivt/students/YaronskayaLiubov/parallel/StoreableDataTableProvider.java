@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Created by luba_yaronskaya on 16.11.14.
@@ -23,6 +25,7 @@ import java.util.Map;
 public class StoreableDataTableProvider implements TableProvider {
     public String dbDir;
     protected Map<String, StoreableDataTable> tables;
+    private ReadWriteLock rwlLock = new ReentrantReadWriteLock();
 
     protected StoreableDataTableProvider(String dir) throws IllegalArgumentException {
         if (dir == null) {
@@ -51,13 +54,21 @@ public class StoreableDataTableProvider implements TableProvider {
     @Override
     public Table getTable(String name) {
         CheckParameters.checkTableName(name);
-        return tables.get(name);
+
+        rwlLock.readLock().lock();
+        Table table = tables.get(name);
+        rwlLock.readLock().unlock();
+
+        return table;
     }
 
     @Override
     public Table createTable(String name, List<Class<?>> columnTypes) {
         CheckParameters.checkTableName(name);
         CheckParameters.checkColumnTypesList(columnTypes);
+
+        rwlLock.writeLock().lock();
+
         if (!(tables.get(name) == null)) {
             return null;
         }
@@ -65,12 +76,16 @@ public class StoreableDataTableProvider implements TableProvider {
         createSignatureFile(tableDir, "signature.tsv", columnTypes);
         StoreableDataTable newTable = new StoreableDataTable(this, tableDir);
         tables.put(name, newTable);
+
+        rwlLock.writeLock().unlock();
         return newTable;
     }
 
     @Override
     public void removeTable(String name) {
         CheckParameters.checkTableName(name);
+
+        rwlLock.writeLock().lock();
         if (tables.remove(name) == null) {
             throw new IllegalStateException("table '" + name + "' does not exist");
         }
@@ -79,6 +94,7 @@ public class StoreableDataTableProvider implements TableProvider {
         } catch (NullPointerException e) {
             //do something?
         }
+        rwlLock.writeLock().unlock();
     }
 
     @Override

@@ -15,7 +15,7 @@ import java.util.Map;
 public class FileMap {
     protected File curDB;
     public String dbPath;
-    protected HashMap<String, String> data;
+    protected Map<String, String> data;
 
     public FileMap(String path) {
         curDB = new File(path);

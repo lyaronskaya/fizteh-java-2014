@@ -119,23 +119,43 @@ public class StoreableDataTable implements Table {
     @Override
     public int commit() {
         lock.lock();
-        int deltaCount = deltaAdded.get().size() + deltaChanged.get().size() + deltaRemoved.get().size();
-        committedData.putAll(deltaAdded);
-        committedData.putAll(deltaChanged);
-        committedData.keySet().removeAll(deltaRemoved);
-        deltaAdded.set(new HashMap<String, Storeable>());
-        deltaChanged.set(new HashMap<String, Storeable>());
-        deltaRemoved.set(new HashSet<String>());
+        Map<String, Storeable> realAdded = new HashMap(deltaAdded.get());
+        Map<String, Storeable> realChanged = new HashMap(deltaChanged.get());
+        Map<String, Storeable> tempAdded = new HashMap(deltaAdded.get());
+        Map<String, Storeable> tempChanged = new HashMap(deltaChanged.get());
+
+        realAdded.keySet().removeAll(committedData.keySet());
+        tempChanged.keySet().removeAll(committedData.keySet());
+        realAdded.putAll(tempChanged);
+
+        realChanged.keySet().retainAll(committedData.keySet());
+        tempAdded.keySet().retainAll(committedData.keySet());
+        realChanged.putAll(tempAdded);
+
+        deltaRemoved.get().retainAll(committedData.keySet());
+
+        int deltaCount = realAdded.size() + realChanged.size() + deltaRemoved.get().size();
+
+        committedData.putAll(realAdded);
+        committedData.putAll(realChanged);
+        committedData.keySet().removeAll(deltaRemoved.get());
+        lock.unlock();
+
+        clearDelta();
         return deltaCount;
     }
 
     @Override
     public int rollback() {
         int deltaCount = deltaAdded.get().size() + deltaChanged.get().size() + deltaRemoved.get().size();
+        clearDelta();
+        return deltaCount;
+    }
+
+    private void clearDelta() {
         deltaAdded.set(new HashMap<String, Storeable>());
         deltaChanged.set(new HashMap<String, Storeable>());
         deltaRemoved.set(new HashSet<String>());
-        return deltaCount;
     }
 
     @Override
@@ -159,20 +179,18 @@ public class StoreableDataTable implements Table {
 
     public List<String> list() {
         List<String> keys = new ArrayList<>(committedData.keySet());
-        keys.removeAll(deltaRemoved);
-        keys.addAll(deltaAdded.keySet());
+        keys.removeAll(deltaRemoved.get());
+        keys.addAll(deltaAdded.get().keySet());
         return keys;
     }
 
     public int unsavedChangesCount() {
-        return deltaAdded.size() + deltaChanged.size() + deltaRemoved.size();
+        return deltaAdded.get().size() + deltaChanged.get().size() + deltaRemoved.get().size();
     }
 
     public void loadDBData() {
         committedData.clear();
-        deltaAdded.clear();
-        deltaChanged.clear();
-        deltaRemoved.clear();
+        clearDelta();
         File signatureFile = new File(curDB, "signature.tsv");
         if (!signatureFile.exists()) {
             throw new SignatureFileNotFoundException("Signature file not found");
@@ -217,6 +235,7 @@ public class StoreableDataTable implements Table {
                         }
                     }
                     channel.close();
+
                 } catch (IOException e) {
                     System.err.println("error reading file: " + e.getMessage()
                     );
@@ -306,7 +325,6 @@ public class StoreableDataTable implements Table {
         for (int i = 0; i < 16; ++i) {
             boolean emptyDir = true;
             for (int j = 0; j < 16; ++j) {
-                String fileName = dbPath + File.separator + i + ".dir" + File.separator + j + ".dat";
                 if (!usedFiles[i][j]) {
                     try {
                         Files.delete(Paths.get(dbPath + File.separator + i + ".dir" + File.separator + j + ".dat"));
