@@ -14,6 +14,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by luba_yaronskaya on 16.11.14.
@@ -21,7 +22,7 @@ import java.util.List;
 
 public class StoreableDataTableProvider implements TableProvider {
     public String dbDir;
-    protected HashMap<String, StoreableDataTable> tables;
+    protected Map<String, StoreableDataTable> tables;
 
     protected StoreableDataTableProvider(String dir) throws IllegalArgumentException {
         if (dir == null) {
@@ -224,7 +225,7 @@ public class StoreableDataTableProvider implements TableProvider {
         return columnTypes;
     }
 
-    public HashMap<String, StoreableDataTable> getTables() {
+    public Map<String, StoreableDataTable> getTables() {
         return tables;
     }
 

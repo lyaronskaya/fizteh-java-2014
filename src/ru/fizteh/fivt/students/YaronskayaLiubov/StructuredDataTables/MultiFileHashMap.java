@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -13,7 +14,7 @@ public class MultiFileHashMap {
     public String dbDir;
     protected StoreableDataTableProvider provider;
     protected StoreableDataTable currTable;
-    private HashMap<String, Command> multiFileHashMapCommands;
+    private Map<String, Command> multiFileHashMapCommands;
     public boolean errorOccurred;
 
     public MultiFileHashMap() {
