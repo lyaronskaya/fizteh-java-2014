@@ -17,10 +17,10 @@ public class FileMap {
     public String dbPath;
     protected HashMap<String, String> data;
 
-    public FileMap(String path) {
-        curDB = new File(path);
-        dbPath = new String(path);
-        data = new HashMap<String, String>();
+    public FileMap(String dir, String tableName) {
+        curDB = new File(dir, tableName);
+        dbPath = curDB.getAbsolutePath();
+        data = new HashMap<>();
         loadDBData();
     }
 
@@ -32,21 +32,21 @@ public class FileMap {
 
     public void loadDBData() {
         File[] tableDirs = curDB.listFiles();
+        if (tableDirs == null) {
+            return;
+        }
         for (File dir : tableDirs) {
             if (dir.getName().equals(".DS_Store")) {
                 continue;
             }
             File[] tableFiles = dir.listFiles();
-            if (tableFiles.length == 0) {
-                continue;
-            }
+
             for (File tableFile : tableFiles) {
                 if (tableFile.getName().equals(".DS_Store")) {
                     continue;
                 }
-                FileChannel channel = null;
-                try {
-                    channel = new FileInputStream(tableFile.getCanonicalPath()).getChannel();
+
+                try (FileChannel channel = new FileInputStream(tableFile.getCanonicalPath()).getChannel()) {
 
                     ByteBuffer byteBuffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
 
@@ -60,8 +60,9 @@ public class FileMap {
                         byteBuffer.get(value, 0, valueLength);
                         data.put(new String(key, "UTF-8"), new String(value, "UTF-8"));
                     }
+                    channel.close();
                 } catch (IOException e) {
-                    System.err.println("error reading file" + e.toString()
+                    System.err.println("error reading file: " + e.getMessage()
                     );
                 }
             }
@@ -71,18 +72,20 @@ public class FileMap {
     public void save() {
         for (int i = 0; i < 16; ++i) {
             try {
-                Path dirName = Paths.get(curDB.getCanonicalPath()).resolve(i + ".dir/");
-                if (!Files.exists(dirName)) {
-                    Files.createDirectory(dirName);
+                File dir = new File(dbPath, i + ".dir");
+                dir.mkdirs();
+                if (!dir.exists()) {
+                    dir.createNewFile();
                 }
+                dir.mkdirs();
                 for (int j = 0; j < 16; ++j) {
-                    Path fileName = dirName.resolve(j + ".dat");
-                    if (!Files.exists(fileName)) {
-                        Files.createFile(fileName);
+                    File file = new File(dir, j + ".dat");
+                    if (!file.exists()) {
+                        file.createNewFile();
                     }
                 }
             } catch (IOException e) {
-                System.err.println("error creating directory");
+                System.err.println("error writing on disk: " + e.getMessage());
             }
         }
 
@@ -104,10 +107,8 @@ public class FileMap {
                     fos[ndirectory][nfile] = new FileOutputStream(dbPath + File.separator + ndirectory + ".dir"
                             + File.separator + nfile + ".dat");
                 }
-                byte[] keyInBytes = new byte[0];
-                byte[] valueInBytes = new byte[0];
-                keyInBytes = key.getBytes("UTF-8");
-                valueInBytes = value.getBytes("UTF-8");
+                byte[] keyInBytes = key.getBytes("UTF-8");
+                byte[] valueInBytes = value.getBytes("UTF-8");
                 ByteBuffer bb = ByteBuffer.allocate(8 + keyInBytes.length + valueInBytes.length);
                 bb.putInt(keyInBytes.length);
                 bb.put(keyInBytes);
@@ -148,7 +149,6 @@ public class FileMap {
         for (int i = 0; i < 16; ++i) {
             boolean emptyDir = true;
             for (int j = 0; j < 16; ++j) {
-                String fileName = dbPath + File.separator + i + ".dir" + File.separator + j + ".dat";
                 if (!usedFiles[i][j]) {
                     try {
                         Files.delete(Paths.get(dbPath + File.separator + i + ".dir" + File.separator + j + ".dat"));

@@ -9,7 +9,8 @@ public class MultiFileHashMapMain {
         try {
             errorOccurred = !MultiFileHashMap.exec(args);
         } catch (Exception e) {
-            System.err.println(e.toString());
+            System.err.println(e.getMessage());
+            e.printStackTrace();
             errorOccurred = true;
         }
         if (errorOccurred) {
