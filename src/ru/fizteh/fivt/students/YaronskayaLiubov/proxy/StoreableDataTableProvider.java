@@ -22,10 +22,11 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * Created by luba_yaronskaya on 16.11.14.
  */
 
-public class StoreableDataTableProvider implements TableProvider {
+public class StoreableDataTableProvider implements TableProvider, AutoCloseable {
     public String dbDir;
     protected Map<String, StoreableDataTable> tables;
     private ReadWriteLock rwlLock = new ReentrantReadWriteLock();
+    private boolean closed = false;
 
 
     protected StoreableDataTableProvider(String dir) throws IllegalArgumentException {
@@ -54,6 +55,7 @@ public class StoreableDataTableProvider implements TableProvider {
 
     @Override
     public Table getTable(String name) {
+        checkUnclosed();
         CheckParameters.checkTableName(name);
 
         rwlLock.readLock().lock();
@@ -65,6 +67,7 @@ public class StoreableDataTableProvider implements TableProvider {
 
     @Override
     public Table createTable(String name, List<Class<?>> columnTypes) {
+        checkUnclosed();
         CheckParameters.checkTableName(name);
         CheckParameters.checkColumnTypesList(columnTypes);
 
@@ -84,6 +87,7 @@ public class StoreableDataTableProvider implements TableProvider {
 
     @Override
     public void removeTable(String name) {
+        checkUnclosed();
         CheckParameters.checkTableName(name);
 
         rwlLock.writeLock().lock();
@@ -100,6 +104,8 @@ public class StoreableDataTableProvider implements TableProvider {
 
     @Override
     public Storeable deserialize(Table table, String value) throws ParseException {
+        checkUnclosed();
+
         TableItem row = new TableItem(table);
         try {
             XMLStreamReader xmlReader = XMLInputFactory.newInstance()
@@ -147,7 +153,9 @@ public class StoreableDataTableProvider implements TableProvider {
 
     @Override
     public String serialize(Table table, Storeable value) throws ColumnFormatException {
+        checkUnclosed();
         CheckParameters.checkMatchItemToTable(table, value);
+
         StringWriter stringWriter = new StringWriter();
         XMLOutputFactory factory = XMLOutputFactory.newInstance();
         try {
@@ -175,11 +183,15 @@ public class StoreableDataTableProvider implements TableProvider {
 
     @Override
     public Storeable createFor(Table table) {
+        checkUnclosed();
+
         return new TableItem(table);
     }
 
     @Override
     public Storeable createFor(Table table, List<?> values) throws ColumnFormatException, IndexOutOfBoundsException {
+        checkUnclosed();
+
         TableItem row = new TableItem(table);
         if (table.getColumnsCount() != values.size()) {
             throw new IndexOutOfBoundsException("Incorrect values count");
@@ -298,5 +310,25 @@ public class StoreableDataTableProvider implements TableProvider {
         } catch (IOException e) {
             //
         }
+    }
+    @Override
+    public void close() {
+        if (!closed) {
+            for (Map.Entry<String, StoreableDataTable> entry : tables.entrySet()) {
+                entry.getValue().close();
+            }
+            closed = true;
+        }
+    }
+
+    private void checkUnclosed() {
+        if (closed) {
+            throw new IllegalStateException("Command failed: TableProvider have been closed");
+        }
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s[%s]", getClass().getSimpleName(), Paths.get(dbDir).toAbsolutePath());
     }
 }

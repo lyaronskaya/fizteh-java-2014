@@ -1,10 +1,14 @@
 package ru.fizteh.fivt.students.YaronskayaLiubov.proxy;
 
+import org.json.JSONArray;
 import ru.fizteh.fivt.storage.structured.ColumnFormatException;
 import ru.fizteh.fivt.storage.structured.Storeable;
 import ru.fizteh.fivt.storage.structured.Table;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by luba_yaronskaya on 16.11.14.
@@ -124,5 +128,12 @@ public class TableItem implements Storeable {
 
     public int getItemsCount() {
         return itemsCount;
+    }
+
+    @Override
+    public String toString() {
+        String values = new JSONArray(Arrays.asList(items)).toString();
+
+        return String.format("%s[%s]", getClass().getSimpleName(), values.replace("null", ""));
     }
 }

@@ -18,7 +18,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * Created by luba_yaronskaya on 16.11.14.
  */
 
-public class StoreableDataTable implements Table {
+public class StoreableDataTable implements Table, AutoCloseable {
     protected File curDB;
     public String dbPath;
     private List<Class<?>> columnTypes;
@@ -60,6 +60,7 @@ public class StoreableDataTable implements Table {
     @Override
     public Storeable get(String key) {
         CheckParameters.checkKey(key);
+        checkUnclosed();
 
         if (deltaRemoved.get().contains(key)) {
             return null;
@@ -77,48 +78,48 @@ public class StoreableDataTable implements Table {
     public Storeable put(String key, Storeable value) throws ColumnFormatException {
         CheckParameters.checkKey(key);
         CheckParameters.checkValue(value);
-
-        Storeable oldValue = null;
+        checkUnclosed();
 
         if (deltaChanged.get().containsKey(key)) {
-            oldValue = deltaChanged.get().put(key, value);
+            return deltaChanged.get().put(key, value);
         } else {
             if (committedData.containsKey(key)) {
-                oldValue = committedData.get(key);
                 deltaChanged.get().put(key, value);
+                return committedData.get(key);
             } else {
-                oldValue = deltaAdded.get().put(key, value);
+                return deltaAdded.get().put(key, value);
             }
         }
-        return oldValue;
     }
 
     @Override
     public Storeable remove(String key) {
         CheckParameters.checkKey(key);
+        checkUnclosed();
 
-        Storeable value = null;
         if (committedData.containsKey(key)) {
             if (deltaChanged.get().containsKey(key)) {
-                value = deltaChanged.get().remove(key);
+                return deltaChanged.get().remove(key);
             } else {
                 deltaRemoved.get().add(key);
             }
         } else {
             if (deltaAdded.get().containsKey(key)) {
-                value = deltaAdded.get().remove(key);
+                return deltaAdded.get().remove(key);
             }
         }
-        return value;
+        return null;
     }
 
     @Override
     public int size() {
+        checkUnclosed();
         return committedData.size() + deltaAdded.get().size() - deltaRemoved.get().size();
     }
 
     @Override
     public int commit() {
+        checkUnclosed();
         lock.lock();
         Map<String, Storeable> realAdded = new HashMap(deltaAdded.get());
         Map<String, Storeable> realChanged = new HashMap(deltaChanged.get());
@@ -148,6 +149,7 @@ public class StoreableDataTable implements Table {
 
     @Override
     public int rollback() {
+        checkUnclosed();
         int deltaCount = deltaAdded.get().size() + deltaChanged.get().size() + deltaRemoved.get().size();
         clearDelta();
         return deltaCount;
@@ -161,11 +163,13 @@ public class StoreableDataTable implements Table {
 
     @Override
     public int getColumnsCount() {
+        checkUnclosed();
         return columnTypes.size();
     }
 
     @Override
     public Class<?> getColumnType(int columnIndex) throws IndexOutOfBoundsException {
+        checkUnclosed();
         if (columnIndex < 0 || columnIndex >= getColumnsCount()) {
             throw new IndexOutOfBoundsException("illegal column index");
         }
@@ -179,6 +183,7 @@ public class StoreableDataTable implements Table {
     }
 
     public List<String> list() {
+        checkUnclosed();
         List<String> keys = new ArrayList<>(committedData.keySet());
         keys.removeAll(deltaRemoved.get());
         keys.addAll(deltaAdded.get().keySet());
@@ -186,6 +191,7 @@ public class StoreableDataTable implements Table {
     }
 
     public int unsavedChangesCount() {
+        checkUnclosed();
         return deltaAdded.get().size() + deltaChanged.get().size() + deltaRemoved.get().size();
     }
 
@@ -235,8 +241,6 @@ public class StoreableDataTable implements Table {
                             throw new RuntimeException(e.getMessage());
                         }
                     }
-                    channel.close();
-
                 } catch (IOException e) {
                     System.err.println("error reading file: " + e.getMessage()
                     );
@@ -367,4 +371,22 @@ public class StoreableDataTable implements Table {
         }
     }
 
+    @Override
+    public void close() {
+        if (!closed) {
+            rollback();
+            closed = true;
+        }
+    }
+
+private void checkUnclosed() {
+    if (closed) {
+        throw new IllegalStateException("Command failed: table have been closed");
+    }
+}
+
+    @Override
+    public String toString() {
+        return String.format("%s[%s]", getClass().getSimpleName(), curDB.getAbsolutePath());
+    }
 }
