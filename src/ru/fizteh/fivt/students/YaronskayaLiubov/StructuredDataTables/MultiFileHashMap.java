@@ -51,12 +51,9 @@ public class MultiFileHashMap {
 
     public boolean exec(String[] args) {
         if (args.length == 0) {
-            while (true) {
-                System.out.print(System.getProperty("user.dir") + "$ ");
-                Scanner scanner = new Scanner(System.in);
-                if (!scanner.hasNextLine()) {
-                    break;
-                }
+            System.out.print(System.getProperty("user.dir") + "$ ");
+            Scanner scanner = new Scanner(System.in);
+            while (scanner.hasNextLine()) {
                 for (String s : scanner.nextLine().split(";")) {
                     String[] argv = s.trim().split("\\s+");
                     String curCommand = argv[0];
@@ -79,14 +76,11 @@ public class MultiFileHashMap {
                         System.err.println(e.getMessage());
                     }
                 }
+                System.out.print(System.getProperty("user.dir") + "$ ");
             }
         } else {
-            StringBuilder joinedArgs = new StringBuilder();
-            for (String s : args) {
-                joinedArgs.append(s);
-                joinedArgs.append(" ");
-            }
-            String[] argsPool = joinedArgs.toString().split(";");
+
+            String[] argsPool = String.join(" ", args).split(";");
             for (String s : argsPool) {
                 String[] argv = s.trim().split("\\s+");
                 String curCommand = argv[0];

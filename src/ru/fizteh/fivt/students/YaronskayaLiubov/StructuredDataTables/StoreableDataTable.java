@@ -21,10 +21,10 @@ public class StoreableDataTable implements Table {
     public String dbPath;
     private List<Class<?>> columnTypes;
     private StoreableDataTableProvider provider;
-    private Map<String, Storeable> committedData;
-    private Map<String, Storeable> deltaAdded;
-    private Map<String, Storeable> deltaChanged;
-    private Set<String> deltaRemoved;
+    private HashMap<String, Storeable> committedData;
+    private HashMap<String, Storeable> deltaAdded;
+    private HashMap<String, Storeable> deltaChanged;
+    private HashSet<String> deltaRemoved;
 
     protected StoreableDataTable(StoreableDataTableProvider provider, String dbPath) {
         if (!Files.exists(Paths.get(dbPath))) {
