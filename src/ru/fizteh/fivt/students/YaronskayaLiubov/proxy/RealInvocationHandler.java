@@ -69,9 +69,9 @@ public class RealInvocationHandler implements InvocationHandler {
             if (values.containsKey(val)) {
                 res.put("cyclic");
             } else {
+                IdentityHashMap<Object, Object> valuesUpdate = values;
                 if (val instanceof Iterable) {
-                    IdentityHashMap<Object, Object> valuesUpdate = new IdentityHashMap<>(values);
-                    valuesUpdate.put(val, null);
+                    valuesUpdate.put(val, val);
                     res.put(getJSONArray((Iterable) val, valuesUpdate));
                 } else {
                     res.put(val.toString());
