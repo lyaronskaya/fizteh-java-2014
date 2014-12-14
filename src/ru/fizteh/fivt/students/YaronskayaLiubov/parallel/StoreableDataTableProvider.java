@@ -72,17 +72,17 @@ public class StoreableDataTableProvider implements TableProvider {
         CheckParameters.checkColumnTypesList(columnTypes);
         StoreableDataTable newTable;
         rwlLock.writeLock().lock();
-try {
-    if (!(tables.get(name) == null)) {
-        return null;
-    }
-    String tableDir = dbDir + File.separator + name;
-    createSignatureFile(tableDir, "signature.tsv", columnTypes);
-    newTable = new StoreableDataTable(this, tableDir);
-    tables.put(name, newTable);
-} finally {
-    rwlLock.writeLock().unlock();
-}
+        try {
+            if (!(tables.get(name) == null)) {
+                return null;
+            }
+            String tableDir = dbDir + File.separator + name;
+            createSignatureFile(tableDir, "signature.tsv", columnTypes);
+            newTable = new StoreableDataTable(this, tableDir);
+            tables.put(name, newTable);
+        } finally {
+            rwlLock.writeLock().unlock();
+        }
         return newTable;
     }
 
