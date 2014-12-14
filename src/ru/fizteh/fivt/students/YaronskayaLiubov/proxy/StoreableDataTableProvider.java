@@ -333,7 +333,7 @@ public class StoreableDataTableProvider implements TableProvider, AutoCloseable 
 
     private void checkUnclosed() {
         if (closed) {
-            throw new IllegalStateException("Command failed: TableProvider have been closed");
+            throw new IllegalStateException("Command failed: tableProvider have been closed");
         }
     }
 
