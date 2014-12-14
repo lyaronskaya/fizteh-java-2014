@@ -120,28 +120,32 @@ public class StoreableDataTable implements Table, AutoCloseable {
     @Override
     public int commit() {
         checkUnclosed();
+        int deltaCount;
         lock.lock();
-        Map<String, Storeable> realAdded = new HashMap(deltaAdded.get());
-        Map<String, Storeable> realChanged = new HashMap(deltaChanged.get());
-        Map<String, Storeable> tempAdded = new HashMap(deltaAdded.get());
-        Map<String, Storeable> tempChanged = new HashMap(deltaChanged.get());
+        try {
+            Map<String, Storeable> realAdded = new HashMap(deltaAdded.get());
+            Map<String, Storeable> realChanged = new HashMap(deltaChanged.get());
+            Map<String, Storeable> tempAdded = new HashMap(deltaAdded.get());
+            Map<String, Storeable> tempChanged = new HashMap(deltaChanged.get());
 
-        realAdded.keySet().removeAll(committedData.keySet());
-        tempChanged.keySet().removeAll(committedData.keySet());
-        realAdded.putAll(tempChanged);
+            realAdded.keySet().removeAll(committedData.keySet());
+            tempChanged.keySet().removeAll(committedData.keySet());
+            realAdded.putAll(tempChanged);
 
-        realChanged.keySet().retainAll(committedData.keySet());
-        tempAdded.keySet().retainAll(committedData.keySet());
-        realChanged.putAll(tempAdded);
+            realChanged.keySet().retainAll(committedData.keySet());
+            tempAdded.keySet().retainAll(committedData.keySet());
+            realChanged.putAll(tempAdded);
 
-        deltaRemoved.get().retainAll(committedData.keySet());
+            deltaRemoved.get().retainAll(committedData.keySet());
 
-        int deltaCount = realAdded.size() + realChanged.size() + deltaRemoved.get().size();
+            deltaCount = realAdded.size() + realChanged.size() + deltaRemoved.get().size();
 
-        committedData.putAll(realAdded);
-        committedData.putAll(realChanged);
-        committedData.keySet().removeAll(deltaRemoved.get());
-        lock.unlock();
+            committedData.putAll(realAdded);
+            committedData.putAll(realChanged);
+            committedData.keySet().removeAll(deltaRemoved.get());
+        } finally {
+            lock.unlock();
+        }
 
         clearDelta();
         return deltaCount;
@@ -379,11 +383,11 @@ public class StoreableDataTable implements Table, AutoCloseable {
         }
     }
 
-private void checkUnclosed() {
-    if (closed) {
-        throw new IllegalStateException("Command failed: table have been closed");
+    private void checkUnclosed() {
+        if (closed) {
+            throw new IllegalStateException("Command failed: table have been closed");
+        }
     }
-}
 
     @Override
     public String toString() {

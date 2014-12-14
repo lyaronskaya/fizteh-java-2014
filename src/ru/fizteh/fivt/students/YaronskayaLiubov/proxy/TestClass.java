@@ -8,9 +8,14 @@ import java.util.List;
  */
 public interface TestClass {
     void voidMethod();
+
     Integer intMethodIntInt(Integer x, Integer y);
+
     void exceptionMethod() throws IOException;
+
     List<Integer> listMethod();
+
     int[] arrayMethod();
+
     void voidMethodCyclicList(List<Object> list);
 }

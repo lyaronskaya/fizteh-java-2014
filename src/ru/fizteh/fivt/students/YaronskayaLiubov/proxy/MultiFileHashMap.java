@@ -32,7 +32,7 @@ public class MultiFileHashMap {
         try {
             provider = (StoreableDataTableProvider) new StoreableDataTableProviderFactory().create(dbDir);
         } catch (IOException e) {
-            //
+            System.err.println("error creating TableProvider: " + e.getMessage());
         }
         multiFileHashMapCommands = new HashMap<>();
         multiFileHashMapCommands.put("commit", new CommitCommand());
@@ -81,12 +81,7 @@ public class MultiFileHashMap {
                 }
             }
         } else {
-            StringBuilder joinedArgs = new StringBuilder();
-            for (String s : args) {
-                joinedArgs.append(s);
-                joinedArgs.append(" ");
-            }
-            String[] argsPool = joinedArgs.toString().split(";");
+            String[] argsPool = String.join(" ", args).split(";");
             for (String s : argsPool) {
                 String[] argv = s.trim().split("\\s+");
                 String curCommand = argv[0];

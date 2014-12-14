@@ -10,9 +10,6 @@ import java.lang.reflect.Proxy;
  */
 public class RealLoggingProxyFactory implements LoggingProxyFactory {
 
-    public RealLoggingProxyFactory() {
-    }
-
     @Override
     public Object wrap(
             Writer writer,

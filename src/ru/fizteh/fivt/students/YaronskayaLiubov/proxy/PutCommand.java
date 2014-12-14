@@ -33,7 +33,7 @@ public class PutCommand extends Command {
                 System.out.println("new");
             }
         } catch (ParseException e) {
-            e.getMessage();
+            System.err.println(e.getMessage());
         }
         return true;
     }

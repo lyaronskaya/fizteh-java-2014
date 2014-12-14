@@ -59,8 +59,12 @@ public class StoreableDataTableProvider implements TableProvider, AutoCloseable 
         CheckParameters.checkTableName(name);
 
         rwlLock.readLock().lock();
-        Table table = tables.get(name);
-        rwlLock.readLock().unlock();
+        Table table;
+        try {
+            table = tables.get(name);
+        } finally {
+            rwlLock.readLock().unlock();
+        }
 
         return table;
     }
@@ -72,16 +76,18 @@ public class StoreableDataTableProvider implements TableProvider, AutoCloseable 
         CheckParameters.checkColumnTypesList(columnTypes);
 
         rwlLock.writeLock().lock();
-
-        if (!(tables.get(name) == null)) {
-            return null;
+        StoreableDataTable newTable;
+        try {
+            if (!(tables.get(name) == null)) {
+                return null;
+            }
+            String tableDir = dbDir + File.separator + name;
+            createSignatureFile(tableDir, "signature.tsv", columnTypes);
+            newTable = new StoreableDataTable(this, tableDir);
+            tables.put(name, newTable);
+        } finally {
+            rwlLock.writeLock().unlock();
         }
-        String tableDir = dbDir + File.separator + name;
-        createSignatureFile(tableDir, "signature.tsv", columnTypes);
-        StoreableDataTable newTable = new StoreableDataTable(this, tableDir);
-        tables.put(name, newTable);
-
-        rwlLock.writeLock().unlock();
         return newTable;
     }
 
@@ -91,15 +97,18 @@ public class StoreableDataTableProvider implements TableProvider, AutoCloseable 
         CheckParameters.checkTableName(name);
 
         rwlLock.writeLock().lock();
-        if (tables.remove(name) == null) {
-            throw new IllegalStateException("table '" + name + "' does not exist");
-        }
         try {
-            StoreableDataTable.fileDelete(new File(Paths.get(dbDir).resolve(name).toString()));
-        } catch (NullPointerException e) {
-            //do something?
+            if (tables.remove(name) == null) {
+                throw new IllegalStateException("table '" + name + "' does not exist");
+            }
+            try {
+                StoreableDataTable.fileDelete(new File(Paths.get(dbDir).resolve(name).toString()));
+            } catch (NullPointerException e) {
+                //do something?
+            }
+        } finally {
+            rwlLock.writeLock().unlock();
         }
-        rwlLock.writeLock().unlock();
     }
 
     @Override
@@ -306,11 +315,12 @@ public class StoreableDataTableProvider implements TableProvider, AutoCloseable 
                 throw new RuntimeException("error writing signature");
             }
         } catch (FileNotFoundException e) {
-            //file never not found
+            throw new IllegalStateException();
         } catch (IOException e) {
             //
         }
     }
+
     @Override
     public void close() {
         if (!closed) {

@@ -54,6 +54,9 @@ public class TableItem implements Storeable {
         if (columnIndex < 0 || columnIndex >= itemsCount) {
             throw new IndexOutOfBoundsException("illegal column index");
         }
+        if (items[columnIndex] == null) {
+            return null;
+        }
         if (!(items[columnIndex] instanceof Integer)) {
             throw new ColumnFormatException("Column format is not Integer");
         }
@@ -64,6 +67,9 @@ public class TableItem implements Storeable {
     public Long getLongAt(int columnIndex) throws ColumnFormatException, IndexOutOfBoundsException {
         if (columnIndex < 0 || columnIndex >= itemsCount) {
             throw new IndexOutOfBoundsException("illegal column index");
+        }
+        if (items[columnIndex] == null) {
+            return null;
         }
         if (!(items[columnIndex] instanceof Long)) {
             throw new ColumnFormatException("Column format is not Long");
@@ -76,6 +82,9 @@ public class TableItem implements Storeable {
         if (columnIndex < 0 || columnIndex >= itemsCount) {
             throw new IndexOutOfBoundsException("illegal column index");
         }
+        if (items[columnIndex] == null) {
+            return null;
+        }
         if (!(items[columnIndex] instanceof Byte)) {
             throw new ColumnFormatException("Column format is not Byte");
         }
@@ -86,6 +95,9 @@ public class TableItem implements Storeable {
     public Float getFloatAt(int columnIndex) throws ColumnFormatException, IndexOutOfBoundsException {
         if (columnIndex < 0 || columnIndex >= itemsCount) {
             throw new IndexOutOfBoundsException("illegal column index");
+        }
+        if (items[columnIndex] == null) {
+            return null;
         }
         if (!(items[columnIndex] instanceof Float)) {
             throw new ColumnFormatException("Column format is not Float");
@@ -98,6 +110,9 @@ public class TableItem implements Storeable {
         if (columnIndex < 0 || columnIndex >= itemsCount) {
             throw new IndexOutOfBoundsException("illegal column index");
         }
+        if (items[columnIndex] == null) {
+            return null;
+        }
         if (!(items[columnIndex] instanceof Double)) {
             throw new ColumnFormatException("Column format is not Double");
         }
@@ -109,6 +124,9 @@ public class TableItem implements Storeable {
         if (columnIndex < 0 || columnIndex >= itemsCount) {
             throw new IndexOutOfBoundsException("illegal column index");
         }
+        if (items[columnIndex] == null) {
+            return null;
+        }
         if (!(items[columnIndex] instanceof Boolean)) {
             throw new ColumnFormatException("Column format is not Boolean");
         }
@@ -119,6 +137,9 @@ public class TableItem implements Storeable {
     public String getStringAt(int columnIndex) throws ColumnFormatException, IndexOutOfBoundsException {
         if (columnIndex < 0 || columnIndex >= itemsCount) {
             throw new IndexOutOfBoundsException("illegal column index");
+        }
+        if (items[columnIndex] == null) {
+            return null;
         }
         if (!(items[columnIndex] instanceof String)) {
             throw new ColumnFormatException("Column format is not String");
