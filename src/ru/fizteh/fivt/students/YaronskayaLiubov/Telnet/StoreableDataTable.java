@@ -169,8 +169,8 @@ public class StoreableDataTable implements Table, AutoCloseable {
     @Override
     public int getNumberOfUncommittedChanges() {
         return deltaAdded.get().size()
-                + deltaChanged.get().size() +
-                deltaRemoved.get().size();
+                + deltaChanged.get().size()
+                + deltaRemoved.get().size();
     }
 
     private void clearDelta() {

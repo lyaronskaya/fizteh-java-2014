@@ -1,8 +1,6 @@
 package ru.fizteh.fivt.students.YaronskayaLiubov.Telnet;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -46,7 +44,7 @@ public class Shell {
                 try {
                     provider.close();
                 } catch (IOException e) {
-
+//
                 }
             }
         });
@@ -75,7 +73,7 @@ public class Shell {
                 try {
                     provider.close();
                 } catch (IOException e) {
-
+//
                 }
             }
         });

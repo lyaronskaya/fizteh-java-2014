@@ -1,7 +1,5 @@
 package ru.fizteh.fivt.students.YaronskayaLiubov.Telnet;
 
-import java.io.IOException;
-
 /**
  * Created by luba_yaronskaya on 21.12.14.
  */

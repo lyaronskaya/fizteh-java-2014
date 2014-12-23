@@ -1,7 +1,5 @@
 package ru.fizteh.fivt.students.YaronskayaLiubov.Telnet;
 
-import ru.fizteh.fivt.storage.structured.Table;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

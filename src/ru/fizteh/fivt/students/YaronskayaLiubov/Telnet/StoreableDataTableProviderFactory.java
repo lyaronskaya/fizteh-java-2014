@@ -3,10 +3,9 @@ package ru.fizteh.fivt.students.YaronskayaLiubov.Telnet;
 import ru.fizteh.fivt.storage.structured.RemoteTableProvider;
 import ru.fizteh.fivt.storage.structured.RemoteTableProviderFactory;
 import ru.fizteh.fivt.storage.structured.TableProvider;
-import ru.fizteh.fivt.storage.structured.TableProviderFactory;
 
 import java.io.IOException;
-import java.nio.file.Paths;
+
 
 /**
  * Created by luba_yaronskaya on 16.11.14.

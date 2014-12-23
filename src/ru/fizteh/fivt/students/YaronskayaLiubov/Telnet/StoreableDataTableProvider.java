@@ -4,7 +4,6 @@ import ru.fizteh.fivt.storage.structured.*;
 
 import javax.xml.stream.*;
 import java.io.*;
-import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -132,9 +131,11 @@ public class StoreableDataTableProvider implements RemoteTableProvider {
                             row.setColumnAt(columnIndex, null);
                         } else {
                             if (!xmlReader.getLocalName().equals("col")) {
-                                throw new ParseException("Incorrect tag name", xmlReader.getLocation().getCharacterOffset());
+                                throw new ParseException("Incorrect tag name",
+                                        xmlReader.getLocation().getCharacterOffset());
                             }
-                            row.setColumnAt(columnIndex, parseXxx(xmlReader.getElementText(), table.getColumnType(columnIndex)));
+                            row.setColumnAt(columnIndex,
+                                    parseXxx(xmlReader.getElementText(), table.getColumnType(columnIndex)));
                         }
                     } catch (NumberFormatException e) {
                         throw new ParseException("Incorrect xml format", xmlReader.getLocation().getCharacterOffset());
